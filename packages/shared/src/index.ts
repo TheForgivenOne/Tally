@@ -3,3 +3,4 @@
 // See AGENTS.md §4 (price resolution) before adding anything here.
 
 export * from './price.js';
+export * from './catalog.js';

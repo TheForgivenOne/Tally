@@ -1,0 +1,18 @@
+[
+  {
+    "barcode": "012345678905",
+    "name": "Tastee Cheese 250g",
+    "priceMinor": 125000,
+    "source": "tag",
+    "observedAt": "2026-10-14T12:00:00.000Z",
+    "confidence": 0.95
+  },
+  {
+    "barcode": "044500027893",
+    "name": "Grace Corned Beef 340g",
+    "priceMinor": 98500,
+    "source": "cache",
+    "observedAt": "2026-10-12T12:00:00.000Z",
+    "confidence": 0.9
+  }
+]

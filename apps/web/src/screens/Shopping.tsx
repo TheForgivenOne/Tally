@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useShop } from '../basket.js';
 import { BudgetBar } from '../components/BudgetBar.js';
 import { Mascot } from '../components/Mascot.js';
+import { isOnline, subscribeOnline } from '../offline/sync.js';
 
 type CameraState = 'starting' | 'live' | 'unavailable';
 
@@ -11,6 +12,9 @@ export function Shopping() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [camera, setCamera] = useState<CameraState>('starting');
   const [captureNote, setCaptureNote] = useState<string | null>(null);
+  const [online, setOnline] = useState<boolean>(() => isOnline());
+
+  useEffect(() => subscribeOnline(() => setOnline(isOnline())), []);
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -42,6 +46,11 @@ export function Shopping() {
   return (
     <main className="screen screen-shopping">
       <BudgetBar />
+      {!online && (
+        <p role="status" className="cache-note">
+          Offline — showing cached prices. Reports will sync when you reconnect.
+        </p>
+      )}
       <div className="viewfinder">
         {camera === 'live' ? (
           <video ref={videoRef} playsInline muted aria-label="Live camera view of the shelf" />

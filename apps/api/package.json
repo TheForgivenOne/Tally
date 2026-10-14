@@ -8,7 +8,8 @@
     "build": "echo 'no build yet'",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "seed": "tsx scripts/seed-catalog.ts"
   },
   "dependencies": {
     "@tally/shared": "workspace:^",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@hono/zod-validator": "^0.9.1",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.4",
     "wrangler": "^4.151.0"

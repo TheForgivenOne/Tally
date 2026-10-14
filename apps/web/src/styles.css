@@ -188,6 +188,15 @@ input {
   color: var(--muted);
 }
 
+.cache-note {
+  background: var(--amber-bg);
+  color: var(--amber-ink);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
 .viewfinder {
   position: relative;
   background: #111;
