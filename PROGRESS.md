@@ -20,3 +20,4 @@
 - Neon free tier cold-starts after 5 min idle (slow first query)
 - `.pi/mcp.json` ignored until project trusted in interactive session; headless runs need `pi --approve`
 - `browser-testing-with-devtools` skill dormant until Chrome DevTools MCP configured
+- pnpm vs esbuild: `@hono/cli@next` pulls an esbuild 0.28 peer whose postinstall fails under pnpm (binary mismatch); pinned stable `@hono/cli` instead, then removed it (stable lacks `routes`/`request`). If a future dep hits the same wall, suspect pnpm auto-install-peers + esbuild postinstall
