@@ -42,6 +42,7 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const scannerRef = useRef<BarcodeScanner | null>(scanner ?? null);
   const [camera, setCamera] = useState<CameraState>('starting');
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [captureNote, setCaptureNote] = useState<string | null>(null);
   const [online, setOnline] = useState<boolean>(() => isOnline());
   const [reading, setReading] = useState(false);
@@ -166,11 +167,15 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
         // black element. No frames after 3s means honestly unavailable.
         window.setTimeout(() => {
           if (!cancelled && (videoRef.current?.videoWidth ?? 0) === 0) {
+            setCameraError('NoFrames');
             setCamera('unavailable');
           }
         }, 3000);
-      } catch {
-        if (!cancelled) setCamera('unavailable');
+      } catch (e) {
+        if (cancelled) return;
+        const name = e instanceof DOMException ? e.name : 'UnknownError';
+        setCameraError(name);
+        setCamera('unavailable');
       }
     }
     void start();
@@ -194,9 +199,17 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
         ) : camera === 'starting' ? (
           <p role="status">Starting camera…</p>
         ) : (
-          <p role="status" className="camera-fallback">
-            Camera unavailable here. Price capture needs a phone camera — everything else works.
-          </p>
+          <div role="status" className="camera-fallback">
+            <p>Camera unavailable here. Price capture needs a phone camera — everything else works.</p>
+            {cameraError === 'NotAllowedError' && (
+              <p>Permission was denied — allow camera access in the browser settings, then reload.</p>
+            )}
+            {(cameraError === 'NotFoundError' || cameraError === 'OverconstrainedError') && (
+              <p>No suitable camera was found on this device.</p>
+            )}
+            {cameraError === 'NoFrames' && <p>The camera opened but sent no picture — try another browser.</p>}
+            {cameraError !== null && <p className="camera-code">Code: {cameraError}</p>}
+          </div>
         )}
         {/* Camera ref must mount in every state so the effect can attach the stream. */}
         {camera !== 'live' && <video ref={videoRef} playsInline muted hidden aria-hidden="true" />}
