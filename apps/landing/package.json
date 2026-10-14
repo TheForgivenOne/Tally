@@ -1,0 +1,10 @@
+{
+  "name": "@tally/landing",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Astro landing not scaffolded yet'",
+    "build": "echo 'no build yet'"
+  }
+}

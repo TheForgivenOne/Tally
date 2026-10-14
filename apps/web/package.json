@@ -1,0 +1,12 @@
+{
+  "name": "@tally/web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Vite PWA not scaffolded yet'",
+    "build": "echo 'no build yet'",
+    "typecheck": "echo 'no typecheck yet'",
+    "test": "echo 'no tests yet'"
+  }
+}
