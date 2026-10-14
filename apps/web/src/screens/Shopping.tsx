@@ -280,6 +280,10 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
           </div>
         )}
         <Mascot size={48} />
+        <span className="frame-corner fc-tl" aria-hidden="true" />
+        <span className="frame-corner fc-tr" aria-hidden="true" />
+        <span className="frame-corner fc-bl" aria-hidden="true" />
+        <span className="frame-corner fc-br" aria-hidden="true" />
       </div>
       <div className="capture-row">
         <button type="button" className="primary capture" onClick={() => void capture()} disabled={reading}>

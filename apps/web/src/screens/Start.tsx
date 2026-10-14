@@ -11,6 +11,7 @@ export function Home() {
       <button type="button" className="primary" onClick={() => go('store')}>
         Start shopping
       </button>
+      <p className="reassure">Works offline · No account · Your prices stay anonymous</p>
     </main>
   );
 }
@@ -31,12 +32,22 @@ export function StorePick() {
           <li key={s.id}>
             <button
               type="button"
+              className="store-card"
               onClick={() => {
                 setStore(s.id);
                 go('budget');
               }}
             >
-              {s.name}
+              <span className="store-badge" aria-hidden="true">
+                {s.name.charAt(0)}
+              </span>
+              <span className="store-text">
+                <strong>{s.name}</strong>
+                <small>Prices here, updated by shoppers</small>
+              </span>
+              <span className="store-go" aria-hidden="true">
+                ›
+              </span>
             </button>
           </li>
         ))}
@@ -62,6 +73,22 @@ export function Budget() {
       >
         <label htmlFor="budget">Budget in JMD (leave empty for none)</label>
         <input id="budget" name="budget" type="number" inputMode="decimal" min="0" step="0.01" placeholder="e.g. 15000" />
+        <div className="chip-row" role="group" aria-label="Quick budget amounts">
+          {[5000, 10000, 15000, 20000].map((amount) => (
+            <button
+              key={amount}
+              type="button"
+              className="chip"
+              onClick={(e) => {
+                const form = (e.target as HTMLElement).closest('form');
+                const field = form?.querySelector<HTMLInputElement>('#budget');
+                if (field) field.value = String(amount);
+              }}
+            >
+              {amount.toLocaleString('en-JM')}
+            </button>
+          ))}
+        </div>
         <button type="submit" className="primary">
           Start trip
         </button>

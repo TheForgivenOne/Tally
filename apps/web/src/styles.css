@@ -158,6 +158,104 @@ input {
   font-weight: 600;
 }
 
+.store-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.store-badge {
+  flex-shrink: 0;
+  width: var(--touch);
+  height: var(--touch);
+  border-radius: var(--radius);
+  background: var(--brand-wash);
+  color: var(--brand-ink);
+  font-weight: 700;
+  font-size: var(--text-lead);
+  display: grid;
+  place-items: center;
+}
+
+.store-text {
+  display: grid;
+  gap: 0.125rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.store-text small {
+  color: var(--muted);
+  font-size: var(--text-small);
+  font-weight: 400;
+}
+
+.store-go {
+  color: var(--muted);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.reassure {
+  margin-top: var(--space-6);
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+
+.chip-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.chip {
+  min-height: 2.5rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.frame-corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--brand);
+  border-radius: 2px;
+}
+
+.fc-tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; }
+.fc-tr { top: 12px; right: 12px; border-left: 0; border-bottom: 0; }
+.fc-bl { bottom: 12px; left: 12px; border-right: 0; border-top: 0; }
+.fc-br { bottom: 12px; right: 12px; border-left: 0; border-top: 0; }
+
+.receipt {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.receipt-line {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-total {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  font-weight: 700;
+  font-size: var(--text-lead);
+}
+
 /* Pinned ledger card: total always visible mid-trip. */
 .budget-bar {
   background: var(--surface);
