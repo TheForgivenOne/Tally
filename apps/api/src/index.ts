@@ -97,6 +97,9 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
     const winner = resolvePrice(store.list(storeId, barcode));
     if (!winner) return c.json({ message: 'No price known for this product at this store' }, 404);
     return c.json({
+      barcode,
+      name: winner.name,
+      brand: winner.brand,
       priceMinor: winner.priceMinor,
       source: winner.source,
       observedAt: winner.observedAt,

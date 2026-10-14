@@ -3,9 +3,14 @@ import { useShop } from '../basket.js';
 import { BudgetBar } from '../components/BudgetBar.js';
 import { Mascot } from '../components/Mascot.js';
 import { isOnline, subscribeOnline } from '../offline/sync.js';
+import { DetectorScanner, type BarcodeScanner } from '../scan.js';
+import { CannotReadOverlay } from './CannotReadOverlay.js';
+import { captureFlow, type ResolvedItem, type TagItem } from './captureFlow.js';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8787';
 const MAX_DIMENSION = 1024;
+/** Consecutive failures before the guided overlay appears. */
+const OVERLAY_AFTER_FAILURES = 2;
 
 async function captureFrame(video: HTMLVideoElement): Promise<string | null> {
   const width = video.videoWidth;
@@ -31,16 +36,37 @@ async function captureFrame(video: HTMLVideoElement): Promise<string | null> {
 
 type CameraState = 'starting' | 'live' | 'unavailable';
 
-/** Shopping screen: live camera, pinned total, capture. Photo read lands in step 5. */
-export function Shopping() {
+/** Shopping screen: live camera, barcode-first capture, pinned total. */
+export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
   const { go, dispatch, storeId } = useShop();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const scannerRef = useRef<BarcodeScanner | null>(scanner ?? null);
   const [camera, setCamera] = useState<CameraState>('starting');
   const [captureNote, setCaptureNote] = useState<string | null>(null);
   const [online, setOnline] = useState<boolean>(() => isOnline());
   const [reading, setReading] = useState(false);
+  const [failures, setFailures] = useState(0);
 
   useEffect(() => subscribeOnline(() => setOnline(isOnline())), []);
+
+  function getScanner(): BarcodeScanner {
+    if (!scannerRef.current) scannerRef.current = new DetectorScanner();
+    return scannerRef.current;
+  }
+
+  function addLine(item: ResolvedItem | TagItem, barcode: string) {
+    dispatch({
+      type: 'add',
+      line: {
+        barcode,
+        name: item.name,
+        priceMinor: item.priceMinor,
+        source: item.source,
+        observedAt: item.observedAt,
+        confidence: item.confidence,
+      },
+    });
+  }
 
   async function capture() {
     setCaptureNote(null);
@@ -64,43 +90,41 @@ export function Shopping() {
     }
     setReading(true);
     try {
-      const res = await fetch(`${API_BASE}/prices/read-tag`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // No barcode yet (decode lands in step 6): the read returns
-        // unstored and joins the local basket only.
-        body: JSON.stringify({ imageBase64, storeId }),
-      });
-      if (res.status === 429) {
-        setCaptureNote('Daily read limit reached — your cached prices still work.');
-        return;
-      }
-      if (!res.ok) {
-        setCaptureNote('Could not read that tag — retake the photo and try again.');
-        return;
-      }
-      const read = (await res.json()) as {
-        barcode: string;
-        name?: string;
-        priceMinor: number;
-        source: 'tag';
-        observedAt: string;
-        confidence: number;
-        stored: boolean;
-      };
-      dispatch({
-        type: 'add',
-        line: {
-          barcode: read.barcode !== '' ? read.barcode : `tag-${Date.now()}`,
-          name: read.name ?? 'Shelf item',
-          priceMinor: read.priceMinor,
-          source: 'tag',
-          observedAt: read.observedAt,
-          confidence: read.confidence,
+      const outcome = await captureFlow(imageBase64, {
+        decodeBarcode: () => getScanner().detect(video),
+        resolvePrice: async (barcode) => {
+          const res = await fetch(
+            `${API_BASE}/prices/resolve?storeId=${encodeURIComponent(storeId)}&barcode=${encodeURIComponent(barcode)}`,
+          );
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error(`resolve failed (${res.status})`);
+          return (await res.json()) as ResolvedItem;
+        },
+        readTag: async (image, barcode) => {
+          const res = await fetch(`${API_BASE}/prices/read-tag`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(barcode ? { imageBase64: image, storeId, barcode } : { imageBase64: image, storeId }),
+          });
+          if (res.status === 429) throw new Error('limit');
+          if (!res.ok) throw new Error(`read-tag failed (${res.status})`);
+          return (await res.json()) as TagItem & { stored: boolean };
         },
       });
-      setCaptureNote(read.stored ? 'Price added to your basket.' : 'Price added locally — scan the barcode to share it.');
+      if (outcome.kind === 'resolved') {
+        addLine(outcome.item, outcome.item.barcode);
+        setCaptureNote('Price added to your basket.');
+        setFailures(0);
+      } else if (outcome.kind === 'tag') {
+        addLine(outcome.item, outcome.item.barcode !== '' ? outcome.item.barcode : `tag-${Date.now()}`);
+        setCaptureNote('Price added locally — scan the barcode to share it.');
+        setFailures(0);
+      } else {
+        setFailures((f) => f + 1);
+        setCaptureNote('Could not read that tag — retake the photo and try again.');
+      }
     } catch {
+      setFailures((f) => f + 1);
       setCaptureNote('Network failed — the photo stayed on your phone. Try again.');
     } finally {
       setReading(false);
@@ -168,6 +192,15 @@ export function Shopping() {
         <p role="status" className="capture-note">
           {captureNote}
         </p>
+      )}
+      {failures >= OVERLAY_AFTER_FAILURES && (
+        <CannotReadOverlay
+          onRetry={() => {
+            setFailures(0);
+            setCaptureNote(null);
+          }}
+          onClose={() => go('basket')}
+        />
       )}
     </main>
   );

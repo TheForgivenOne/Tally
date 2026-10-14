@@ -40,8 +40,8 @@ function ageDays(observation: PriceObservation, now: number): number {
  * Pick the winning observation: best (lowest) source rank, newest on ties.
  * Returns undefined when there is nothing to resolve from.
  */
-export function resolvePrice(observations: PriceObservation[]): PriceObservation | undefined {
-  let best: PriceObservation | undefined;
+export function resolvePrice<T extends PriceObservation>(observations: T[]): T | undefined {
+  let best: T | undefined;
   for (const current of observations) {
     if (best === undefined) {
       best = current;

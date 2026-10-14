@@ -64,11 +64,12 @@ describe('GET /prices/resolve', () => {
     await postReport(app, { ...REPORT, source: 'cache', priceMinor: 125000, confidence: 0.9 });
     const res = await app.request('/prices/resolve?storeId=store-mobay-1&barcode=012345678905');
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { source: unknown; priceMinor: unknown; label: unknown; consensus: unknown };
+    const body = (await res.json()) as { source: unknown; priceMinor: unknown; label: unknown; consensus: unknown; name: unknown };
     expect(body.source).toBe('cache');
     expect(body.priceMinor).toBe(125000);
     expect(body.label).toBe('exact');
     expect(body.consensus).toBe(false);
+    expect(body.name).toBe('Tastee Cheese 250g');
   });
 
   it('labels AI estimates as estimated', async () => {
