@@ -32,7 +32,7 @@
 
 <div class="frame"><h2>1 · Home — map-centered</h2>
 <p class="why">Map makes store-pick spatial: nearby pins replace the list. Location used once to center, never stored (privacy rule). Trip chip persists over the map when active.</p>
-<p class="a11y">A11y: search field labeled + role=search; pins are buttons ≥44px with names (“Demo store 1, 0.4 km”); resume chip is a link; focus order search → resume → store list.</p>
+<p class="a11y">A11y: search field labeled + role=search; pins are buttons ≥44px with names (“Demo store 1, 0.4 km”); resume chip is a link; focus order search → resume → store list; full-bleed map pads with env(safe-area-inset-*); empty state (nothing within 2 km): list fallback + “Try a parish search”.</p>
 <div class="scr" style="background:#dce8dc;border-radius:0;padding:0;min-height:480px;position:relative;display:block">
   <div style="position:absolute;top:38%;left:44%;font-size:1.4rem">📍</div>
   <div style="position:absolute;top:30%;left:60%;font-size:1.2rem">📍</div>
@@ -48,7 +48,7 @@
 
 <div class="frame"><h2>2 · Shopping — full-screen camera</h2>
 <p class="why">Full-bleed viewfinder, no box. Total floats as a compact chip top; shutter bottom-center (camera-app grammar). Corner frame + sweep live in the feed.</p>
-<p class="a11y">A11y: shutter is the first focus stop, 68px target, labeled “Capture price”; total chip role=status announces on change (polite); hint text paired via aria-describedby; Basket ≥44px.</p>
+<p class="a11y">A11y: shutter is the first focus stop, 68px target, labeled “Capture price”; total chip role=status announces on change (polite); hint text paired via aria-describedby; Basket ≥44px; full-bleed feed pads controls with env(safe-area-inset-*); touch-action: manipulation (no double-tap zoom delay).</p>
 <div class="scr" style="background:#111;color:#fff;border-radius:0;padding:0;min-height:560px;position:relative;display:block">
   <div style="position:absolute;top:12px;left:12px;right:12px;background:rgba(255,255,255,0.95);color:#1b1b1b;border-radius:10px;padding:8px 12px;font-size:0.8rem"><strong>J$12,400 – 12,900</strong> · 78% ▓▓▓▓▓▓▓░░░</div>
   <div style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);width:170px;height:100px;border:3px solid #1a7f37;border-radius:8px;display:grid;place-items:center;font-size:0.7rem;color:#fff">tag here<br/>— sweep —</div>
@@ -58,7 +58,7 @@
 
 <div class="frame"><h2>3 · Scan result — docked card, camera live</h2>
 <p class="why">Result docks bottom over the running feed (non-modal, X to dismiss, camera keeps running). Same three states: reading → resolved → failed.</p>
-<p class="a11y">A11y: card is non-modal (focus NOT trapped, feed controls stay reachable); reading state role=status; failed state role=alert with recovery action first; ✕ labeled “Dismiss result”.</p>
+<p class="a11y">A11y: card is non-modal (focus NOT trapped, feed controls stay reachable); reading state role=status; failed state role=alert with recovery action first; ✕ labeled “Dismiss result”; docked card uses overscroll-behavior: contain (feed never scroll-chains).</p>
 <div class="scr" style="background:#111;color:#fff;border-radius:0;padding:0;min-height:420px;position:relative;display:block">
   <div style="position:absolute;top:12px;left:12px;right:12px;text-align:center;font-size:0.75rem">◉ feed live behind</div>
   <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;color:#1b1b1b;border-radius:14px 14px 0 0;padding:12px 16px 20px;font-size:0.8rem">
@@ -72,7 +72,7 @@
 
 <div class="frame"><h2>4 · Total — trustworthy at a glance</h2>
 <p class="why">Beyond the fare meter: (1) composition bar — green exact vs amber estimated segments, so trust is visible; (2) REMAINING as hero number — shoppers manage what's left; (3) count-up on add; (4) expandable why-rows.</p>
-<p class="a11y">A11y: hero remaining is a live region (polite, throttled to settled totals); composition bar role=img with text equivalent; segments are buttons, not long-press-only (long-press is a shortcut, tap works).</p>
+<p class="a11y">A11y: hero remaining is a live region (polite, throttled to settled totals); composition bar role=img with text equivalent; segments are buttons, not long-press-only (long-press is a shortcut, tap works); all money via Intl.NumberFormat('en-JM', JMD) + tabular-nums.</p>
 <div class="scr">
   <div class="box solid" style="text-align:center"><small>BUDGET LEFT</small><br/><strong style="font-size:1.6rem">J$2,100</strong><br/>of J$15,000 · predicted spend J$12,400–12,900</div>
   <div class="box solid">Composition: ▓▓▓▓▓▓░░░<br/>▓ exact J$9,800 (4 reads) · ░ estimated J$3,100 (2 reads)<br/><em>Long-press a segment for its lines.</em></div>
@@ -82,7 +82,7 @@
 
 <div class="frame"><h2>5 · Basket ledger</h2>
 <p class="why">ELEMENT rows → unit price on row, totals only in pinned bar; minus stops at 1, separate Remove; polite announcements (bag pattern). Zavvy rule: nothing silently dropped.</p>
-<p class="a11y">A11y: steppers are real buttons with aria-labels (“Decrease Tastee Cheese”); Remove resolves via Undo toast (role=status) — no destructive dead-ends; qty changes announced politely.</p>
+<p class="a11y">A11y: steppers are real buttons with aria-labels (“Decrease Tastee Cheese”); Remove resolves via Undo toast (role=status) — no destructive dead-ends; qty changes announced politely; long names line-clamp to 2 with full name in title; empty basket: illustration + “Point at a tag to begin” (never a bare list).</p>
 <div class="scr">
   <div class="box solid">Tastee Cheese · <strong>J$1,250 each</strong> <span class="tag">exact</span><br/>[−] 2 [+] · <u>Remove</u></div>
   <div class="box solid">Grace Corned Beef · <strong>J$985 each</strong> <span class="tag">estimated</span><br/>[−] 1 [+] · <u>Remove</u></div>
@@ -99,7 +99,6 @@
 
 </div>
 <footer style="max-width:720px;margin:32px auto 0;font-size:0.75rem;color:#4d4d4d;line-height:1.6">
-<strong>Pattern sources.</strong> Reticle + sweep + inline result states: Sitka scan/result-card pattern. Docked non-modal card (no sheet): NN/g dialog guidance — sheets are transient interruptions, wrong for a happy path. Explainable range + why-rows: ride-fare UX audits (Rapido/RideKit). Remaining-as-hero: mobile banking budget trackers. Composition bar: budget-composition viz. Ledger rows (unit price on row, totals only in bar, minus stops at 1): delivery-bag pattern + Zavvy no-silent-drop rule. Map-centered store pick: location-used-once privacy rule. Receipt closeout: paper receipt grammar. Camera grammar (floating chip, bottom-center shutter, substantial dock): camera-first app study (AirTake). Home state router (fresh vs resume): Brilliant/Vimeo/Activote.
-</footer>
+<strong>Pattern sources.</strong> Reticle + sweep + inline result states: Sitka scan/result-card pattern. Docked non-modal card (no sheet): NN/g dialog guidance — sheets are transient interruptions, wrong for a happy path. Explainable range + why-rows: ride-fare UX audits (Rapido/RideKit). Remaining-as-hero: mobile banking budget trackers. Composition bar: budget-composition viz. Ledger rows (unit price on row, totals only in bar, minus stops at 1): delivery-bag pattern + Zavvy no-silent-drop rule. Map-centered store pick: location-used-once privacy rule. Receipt closeout: paper receipt grammar. Camera grammar (floating chip, bottom-center shutter, substantial dock): camera-first app study (AirTake). reviewed against the Vercel Web Interface Guidelines (fetched 14 Oct 2026): curly quotes/… already clean; fixes applied — safe-area padding on full-bleed screens, empty states, truncation, Intl currency, overscroll containment, touch-action.</p>
 </body>
 </html>
