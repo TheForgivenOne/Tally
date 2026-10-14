@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "neon": {
+      "url": "https://mcp.neon.tech/mcp",
+      "description": "Neon Postgres management (projects, branches, databases, SQL). Used for Tally's shared price database. Requires sign-in via /mcp."
+    }
+  }
+}

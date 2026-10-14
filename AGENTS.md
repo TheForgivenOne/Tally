@@ -75,7 +75,7 @@ Server-side only, behind provider interface, only after cache/barcode/tag fail, 
 
 ## Working agreements for Pi
 
-Available skills (`.agents/skills/`, auto-loaded): `hono`, `workers-best-practices`, `wrangler` (API work); `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines` (web UI); `supabase-postgres-best-practices` (Neon/Postgres schema).
+Available skills (`.agents/skills/`, auto-loaded): `hono`, `workers-best-practices`, `wrangler`, `web-perf` (API + PWA perf); `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines` (web UI); `supabase-postgres-best-practices` (Neon/Postgres schema). MCP: `neon` remote server in `.pi/mcp.json` (OAuth — run `/mcp login neon` in an interactive session).
 
 - Small, reviewable diffs. Monorepo-aware edits (shared logic lives in `packages/shared`, never duplicated).
 - Privacy invariants are hard rules: no user/device IDs in shared schema, no whole shelf photos stored, receipts discarded after extraction.
