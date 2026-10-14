@@ -19,6 +19,12 @@
       "skillPath": "skills/code-simplification/SKILL.md",
       "computedHash": "7973e746e8e2ea5004d520da970c15a106824b8d6be1bcff48908aec021f3677"
     },
+    "constraint-driven-development": {
+      "source": "TheForgivenOne/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/constraint-driven-development/SKILL.md",
+      "computedHash": "7cdf20ff7d27eb3103b206033a1d87af7afe4a648162f09cd382fc8e3cb9a42b"
+    },
     "debugging-and-error-recovery": {
       "source": "TheForgivenOne/agent-skills",
       "sourceType": "github",
@@ -66,6 +72,18 @@
       "sourceType": "github",
       "skillPath": "skills/security-and-hardening/SKILL.md",
       "computedHash": "1e0cd727cccd3c8c0834ce7722a8a2851e2e849f1352ee972f39311437b021d3"
+    },
+    "shipping-and-launch": {
+      "source": "TheForgivenOne/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/shipping-and-launch/SKILL.md",
+      "computedHash": "65a2be8a52839ec029b779eaf2b59d981fb0956e1228a87c9897f5af8b672f1a"
+    },
+    "spec-driven-development": {
+      "source": "TheForgivenOne/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/spec-driven-development/SKILL.md",
+      "computedHash": "d4dc15caa8d97749267da68676aeadff3fb5b8d9a4462664937137ac09610e4f"
     },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
