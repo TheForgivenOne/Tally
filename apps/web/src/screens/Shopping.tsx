@@ -243,11 +243,15 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
         </p>
       )}
       <div className="viewfinder">
-        {camera === 'live' ? (
-          <video ref={videoRef} playsInline muted aria-label="Live camera view of the shelf" />
-        ) : camera === 'starting' ? (
-          <p role="status">Starting camera…</p>
-        ) : (
+        {/* One video element, always mounted: the stream attaches to THIS node.
+            Swapping elements per state orphaned the stream on a hidden node. */}
+        <video ref={videoRef} playsInline muted autoPlay aria-label="Live camera view of the shelf" />
+        {camera === 'starting' && (
+          <p role="status" className="viewfinder-status">
+            Starting camera…
+          </p>
+        )}
+        {camera === 'unavailable' && (
           <div role="status" className="camera-fallback">
             <p>Camera unavailable here. Price capture needs a phone camera — everything else works.</p>
             {cameraError === 'NotAllowedError' && (
@@ -275,8 +279,6 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
             />
           </div>
         )}
-        {/* Camera ref must mount in every state so the effect can attach the stream. */}
-        {camera !== 'live' && <video ref={videoRef} playsInline muted hidden aria-hidden="true" />}
         <Mascot size={48} />
       </div>
       <div className="capture-row">
