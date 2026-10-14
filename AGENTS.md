@@ -91,6 +91,13 @@ Default mappings (not exhaustive — match on description when in doubt):
 - API shapes, shared contracts → `api-and-interface-design`; anything failing → `debugging-and-error-recovery`; messy but working code → `code-simplification`; every commit → `git-workflow-and-versioning`
 - Framework docs in doubt → Context7 MCP (`query_docs`); external facts (retailers, GCT, DPA) → Exa MCP.
 
+### Autonomous MCP use (standing instruction — do not wait to be told)
+
+Use MCP tools yourself whenever the task calls for them — never wait to be told, never ask permission to look something up:
+- Framework, library, or runtime API questions (Hono, Drizzle, Vite, React, Astro, Workers) → Context7 (`resolve_library_id`, then `query_docs`). Prefer it over memory.
+- External facts — retailer price pages, GCT rules, Jamaica Data Protection Act, competitor landscape → Exa (`web_search_exa`, then `web_fetch_exa`).
+- Anything living in Postgres (schema, data checks, `EXPLAIN`) → Neon MCP once signed in, else `psql` with `.env`.
+
 Available skills (`.agents/skills/`, auto-loaded): `hono`, `workers-best-practices`, `wrangler`, `web-perf` (API + PWA perf); `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`, `frontend-ui-engineering` (web UI); `supabase-postgres-best-practices` (Neon/Postgres schema); `impeccable` (`.pi/skills/` — design critique, audit, polish; 59 deterministic anti-pattern rules, no LLM needed). workflow: `planning-and-task-breakdown`, `incremental-implementation`, `test-driven-development`, `code-review-and-quality`, `debugging-and-error-recovery`, `code-simplification`, `api-and-interface-design`, `security-and-hardening`, `performance-optimization`, `git-workflow-and-versioning` (all from `TheForgivenOne/agent-skills`). MCP: `neon` remote server in `.pi/mcp.json` (OAuth — run `/mcp login neon` in an interactive session). Extension: `pi-subagents` (project package in `.pi/settings.json` — delegate reviews, plan second-opinions, and parallel audits to child agents instead of doing them inline). Workflow: `pi-plan-task` (`/pt` — Plan → Review → Approve → Build → Verify; nothing touches source until the plan is approved; tasks complete only on verified checks; state survives across sessions).
 
 - Small, reviewable diffs. Monorepo-aware edits (shared logic lives in `packages/shared`, never duplicated).
