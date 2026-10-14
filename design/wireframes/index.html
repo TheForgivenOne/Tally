@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tally — wireframes v3 (per-element research)</title>
+<title>Tally — wireframes v4 (per-element research)</title>
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, sans-serif; background: #e8ebe7; color: #1b1b1b; padding: 1.5rem 1rem 4rem; }
@@ -11,22 +11,22 @@
   p.sub { text-align: center; color: #4d4d4d; margin: 0 0 2rem; }
   .frames { display: grid; gap: 2rem; justify-items: center; }
   .frame { width: 360px; max-width: 100%; background: #fff; border: 2px solid #1b1b1b; border-radius: 24px; overflow: hidden; }
-  .frame h2 { border-bottom: 2px solid #1b1b1b; font-size: 0.8125rem; text-align: center; background: #1b1b1b; color: #fff; margin: 0; padding: 0.5rem; }
-  .why { border-bottom: 2px solid #1b1b1b; font-size: 0.75rem; background: #e3f2e7; margin: 0; padding: 8px 12px; border-bottom: 1px solid #1b1b1b; }
+  .frame h2 { border-bottom: 2px solid #1b1b1b; font-size: 0.8125rem; text-align: center; background: #1b1b1b; color: #fff; margin: 0; padding: 8px; }
+  .why { font-size: 0.75rem; background: #e3f2e7; margin: 0; padding: 8px 12px; border-bottom: 2px solid #1b1b1b; }
   .scr { padding: 16px; display: grid; gap: 12px; align-content: start; min-height: 480px; }
   .box { border: 2px dashed #888; border-radius: 8px; padding: 12px; font-size: 0.8125rem; color: #333; background: #f6f7f5; }
   .box.solid { border-style: solid; background: #fff; }
   .box.dark { background: #111; color: #fff; border-color: #111; min-height: 200px; display: grid; place-items: center; text-align: center; position: relative; }
   .box.action { background: #1a7f37; color: #fff; border-color: #1a7f37; text-align: center; font-weight: 700; }
-  .box.row { display: flex; justify-content: space-between; gap: 8px; }
+  .bar { border-top: 2px solid #1b1b1b; border-radius: 0 0 6px 6px; padding: 12px; font-size: 0.8125rem; background: #fff; font-weight: 700; }
   .tag { display: inline-block; font-size: 0.6875rem; font-weight: 700; border: 1px solid #888; border-radius: 999px; padding: 0 8px; margin-left: 8px; }
   .cutout { width: 150px; height: 90px; border: 3px solid #1a7f37; border-radius: 8px; display: grid; place-items: center; font-size: 0.6875rem; background: rgba(255,255,255,0.08); }
-  .state { font-size: 0.6875rem; border: 1px solid #888; border-radius: 4px; padding: 0.1rem 0.4rem; margin-right: 0.3rem; }
+  .state { font-size: 0.6875rem; border: 1px solid #888; border-radius: 4px; padding: 2px 8px; margin-right: 4px; }
 </style>
 </head>
 <body>
-<h1>Tally — wireframes v3 (every element sourced)</h1>
-<p class="sub">No bottom sheets. Each screen names element → pattern → source.</p>
+<h1>Tally — wireframes v4 (every element sourced)</h1>
+<p class="sub">Spacing on a 4/8/12/16/20 scale · boundaries carry meaning (rules separate regions, 14px top-round = docked-over-live, 8px = card). Sources at foot.</p>
 <div class="frames">
 
 <div class="frame"><h2>1 · Home — map-centered</h2>
@@ -36,8 +36,8 @@
   <div style="position:absolute;top:30%;left:60%;font-size:1.2rem">📍</div>
   <div style="position:absolute;top:52%;left:30%;font-size:1.2rem">📍</div>
   <div style="position:absolute;top:14px;left:12px;right:12px;background:#fff;border:1px solid #888;border-radius:10px;padding:8px 12px;font-size:0.8rem">🔍 Search stores… · Tally ▦</div>
-  <div style="position:absolute;top:64px;left:12px;right:12px;background:#e3f2e7;border-radius:10px;padding:0.5rem 0.8rem;font-size:0.75rem">Resume: Demo store 1 · 3 lines · J$3,400–3,900 [›]</div>
-  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:14px 14px 0 0;padding:0.8rem 1rem 1.2rem;font-size:0.8rem">
+  <div style="position:absolute;top:64px;left:12px;right:12px;background:#e3f2e7;border-radius:10px;padding:8px 12px;font-size:0.75rem">Resume: Demo store 1 · 3 lines · J$3,400–3,900 [›]</div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:14px 14px 0 0;padding:12px 16px 20px;font-size:0.8rem">
     <div><strong>Nearby</strong> · within 2 km</div>
     <div style="margin-top:8px">● Demo store 1 — 0.4 km [Start] (~4 min walk)</div>
     <div style="margin-top:8px">● Demo store 2 — 1.1 km [Start]</div>
@@ -57,10 +57,11 @@
 <p class="why">Result docks bottom over the running feed (non-modal, X to dismiss, camera keeps running). Same three states: reading → resolved → failed.</p>
 <div class="scr" style="background:#111;color:#fff;border-radius:0;padding:0;min-height:420px;position:relative;display:block">
   <div style="position:absolute;top:12px;left:12px;right:12px;text-align:center;font-size:0.75rem">◉ feed live behind</div>
-  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;color:#1b1b1b;border-radius:14px 14px 0 0;padding:0.8rem 1rem 1.2rem;font-size:0.8rem">
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;color:#1b1b1b;border-radius:14px 14px 0 0;padding:12px 16px 20px;font-size:0.8rem">
+    <div style="text-align:center;font-size:0.6875rem;color:#666;margin-bottom:8px">━━━ grabber · swipe down or ✕ to dismiss, feed keeps running ━━━</div>
     <div style="text-align:right"><span style="border:1px solid #888;border-radius:50%;padding:0 8px">✕</span></div>
-    <div><span class="state">reading…</span> verifying with store data…</div><br/>
-    <div><span class="state">resolved</span> <strong>Tastee Cheese 250g</strong> · J$1,250 <span class="tag">exact</span> [Add] [Retake]</div><br/>
+    <div><span class="state">reading…</span> verifying with store data…</div><div style="height:8px"></div>
+    <div><span class="state">resolved</span> <strong>Tastee Cheese 250g</strong> · J$1,250 <span class="tag">exact</span> [Add] [Retake]</div><div style="height:8px"></div>
     <div><span class="state">failed</span> Couldn't read it — tilt for glare. [Try again]</div>
   </div>
 </div></div>
@@ -71,7 +72,7 @@
   <div class="box solid" style="text-align:center"><small>BUDGET LEFT</small><br/><strong style="font-size:1.6rem">J$2,100</strong><br/>of J$15,000 · predicted spend J$12,400–12,900</div>
   <div class="box solid">Composition: ▓▓▓▓▓▓░░░<br/>▓ exact J$9,800 (4 reads) · ░ estimated J$3,100 (2 reads)<br/><em>Long-press a segment for its lines.</em></div>
   <div class="box solid">Why this range:<br/>— Tastee Cheese · tag read today · ±2%<br/>— Grace Corned Beef · web reference · ±10%<br/>— AI estimate · ±25% <u>verify me first</u></div>
-  <div class="box action">+ J$1,250 counted up on add ✓</div>
+  <div class="box solid" style="text-align:center">Motion note: total counts up +J$1,250 on add (300ms, reduced-motion: instant)</div>
 </div></div>
 
 <div class="frame"><h2>5 · Basket ledger</h2>
@@ -79,16 +80,19 @@
 <div class="scr">
   <div class="box solid">Tastee Cheese · <strong>J$1,250 each</strong> <span class="tag">exact</span><br/>[−] 2 [+] · <u>Remove</u></div>
   <div class="box solid">Grace Corned Beef · <strong>J$985 each</strong> <span class="tag">estimated</span><br/>[−] 1 [+] · <u>Remove</u></div>
-  <div class="box solid"><strong>3 items · J$3,400 – 3,900</strong> · Undo · End trip</div>
+  <div class="bar">3 items · J$3,400 – 3,900 · Undo · End trip</div>
 </div></div>
 
 <div class="frame"><h2>6 · End trip receipt</h2>
-<p class="why">ELEMENT closeout → receipt-style line closeout vs the register (Shelf to Cart / Zavvy).</p>
+<p class="why">ELEMENT closeout → paper receipt grammar (monospace lines, ✓ exact vs ~ estimated), the shopper's most familiar artifact — compare side-by-side with the register slip.</p>
 <div class="scr">
   <div class="box solid">— Tastee ×2 …… J$2,500 ✓<br/>— Grace ×1 …… J$985 ~<br/><strong>Predicted J$3,400 – 3,900</strong><br/>Compare with your register receipt.</div>
   <div class="box action">Start new trip</div>
 </div></div>
 
 </div>
+<footer style="max-width:720px;margin:32px auto 0;font-size:0.75rem;color:#4d4d4d;line-height:1.6">
+<strong>Pattern sources.</strong> Reticle + sweep + inline result states: Sitka scan/result-card pattern. Docked non-modal card (no sheet): NN/g dialog guidance — sheets are transient interruptions, wrong for a happy path. Explainable range + why-rows: ride-fare UX audits (Rapido/RideKit). Remaining-as-hero: mobile banking budget trackers. Composition bar: budget-composition viz. Ledger rows (unit price on row, totals only in bar, minus stops at 1): delivery-bag pattern + Zavvy no-silent-drop rule. Map-centered store pick: location-used-once privacy rule. Receipt closeout: paper receipt grammar. Camera grammar (floating chip, bottom-center shutter, substantial dock): camera-first app study (AirTake). Home state router (fresh vs resume): Brilliant/Vimeo/Activote.
+</footer>
 </body>
 </html>
