@@ -1,7 +1,9 @@
-/* Tally — light theme for bright aisles. Green brand, ink text, tabular prices. */
+/* Tally world: market-ledger. Light, high-contrast, one-thumb use.
+   Tokens own every value below; no ad-hoc numbers outside :root. */
 :root {
   --brand: #1a7f37;
   --brand-ink: #0d4d20;
+  --brand-wash: #e3f2e7;
   --ink: #1b1b1b;
   --muted: #4d4d4d;
   --surface: #ffffff;
@@ -9,9 +11,32 @@
   --line: #d9ddd6;
   --amber-bg: #fff4d6;
   --amber-ink: #6b4a00;
+  --amber-bar: #b07d00;
   --red-bg: #fde7e7;
   --red-ink: #8f1d1d;
+  --red-bar: #b42323;
+  --on-dark: #ffffff;
+  --viewfinder: #111111;
+
   --radius: 8px;
+  --radius-pill: 999px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --text-small: 0.8125rem;
+  --text-body: 1rem;
+  --text-lead: 1.125rem;
+  --text-title: 1.75rem;
+  --text-total: 1.25rem;
+
+  --touch: 2.75rem;
+  --measure: 32rem;
 }
 
 * {
@@ -28,7 +53,7 @@ body {
 
 ::selection {
   background: var(--brand);
-  color: #fff;
+  color: var(--on-dark);
 }
 
 :focus-visible {
@@ -37,31 +62,42 @@ body {
 }
 
 .screen {
-  max-width: 32rem;
+  max-width: var(--measure);
   margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  padding: var(--space-6) var(--space-4) var(--space-12);
 }
 
 .screen-home {
   text-align: center;
-  padding-top: 3rem;
+  padding-top: var(--space-12);
+}
+
+.screen-home svg {
+  margin-bottom: var(--space-2);
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: var(--text-title);
   line-height: 1.2;
-  margin: 0.75rem 0 0.5rem;
+  margin: var(--space-3) 0 var(--space-2);
   letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
 .lede {
   color: var(--muted);
-  margin: 0 0 1.5rem;
+  font-size: var(--text-lead);
+  margin: 0 0 var(--space-6);
+}
+
+button,
+label.button {
+  font: inherit;
 }
 
 button {
-  font: inherit;
-  padding: 0.75rem 1.25rem;
+  min-height: var(--touch);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--surface);
@@ -78,21 +114,11 @@ button:disabled {
   cursor: default;
 }
 
-button.primary,
-label.button {
+button.primary {
   background: var(--brand);
   border-color: var(--brand);
-  color: #fff;
+  color: var(--on-dark);
   font-weight: 600;
-}
-
-label.button {
-  display: inline-block;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--brand);
-  cursor: pointer;
-  margin-top: 1rem;
 }
 
 button.primary:hover:not(:disabled) {
@@ -102,45 +128,56 @@ button.primary:hover:not(:disabled) {
 label {
   display: block;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
 }
 
 input {
   font: inherit;
   width: 100%;
-  padding: 0.75rem;
+  min-height: var(--touch);
+  padding: var(--space-3);
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .store-list,
 .basket-list {
   list-style: none;
-  margin: 0 0 1.5rem;
+  margin: 0 0 var(--space-6);
   padding: 0;
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .store-list button {
   width: 100%;
   text-align: left;
+  font-weight: 600;
 }
 
+/* Pinned ledger card: total always visible mid-trip. */
 .budget-bar {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.screen-shopping .budget-bar {
+  position: sticky;
+  top: var(--space-2);
+  z-index: 2;
 }
 
 .budget-total {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .budget-label {
@@ -149,35 +186,36 @@ input {
 }
 
 .budget-amount {
-  font-size: 1.25rem;
+  font-size: var(--text-total);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .budget-track {
-  height: 0.5rem;
+  height: var(--space-2);
   background: var(--wash);
-  border-radius: 999px;
-  margin-top: 0.75rem;
+  border-radius: var(--radius-pill);
+  margin-top: var(--space-3);
   overflow: hidden;
 }
 
 .budget-fill {
   height: 100%;
   background: var(--brand);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .budget-bar[data-warning='amber'] .budget-fill {
-  background: #b07d00;
+  background: var(--amber-bar);
 }
 
 .budget-bar[data-warning='red'] .budget-fill {
-  background: #b42323;
+  background: var(--red-bar);
 }
 
 .budget-warning {
-  margin: 0.75rem 0 0;
-  padding: 0.5rem 0.75rem;
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius);
   font-weight: 600;
 }
@@ -193,8 +231,8 @@ input {
 }
 
 .budget-note {
-  margin: 0.5rem 0 0;
-  font-size: 0.8125rem;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 
@@ -202,51 +240,55 @@ input {
   background: var(--amber-bg);
   color: var(--amber-ink);
   border-radius: var(--radius);
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-2) var(--space-3);
   font-weight: 600;
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
 }
 
 .viewfinder {
   position: relative;
-  background: #111;
+  background: var(--viewfinder);
   border-radius: var(--radius);
   min-height: 16rem;
   display: grid;
   place-items: center;
-  color: #fff;
+  color: var(--on-dark);
   overflow: hidden;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .viewfinder video {
   width: 100%;
   max-height: 24rem;
   object-fit: cover;
+  display: block;
 }
 
-.viewfinder svg {
+.viewfinder > svg {
   position: absolute;
-  right: 0.75rem;
-  bottom: 0.75rem;
+  right: var(--space-3);
+  bottom: var(--space-3);
   opacity: 0.9;
 }
 
-.camera-fallback {
-  padding: 2rem;
+.viewfinder-status {
+  position: absolute;
+  inset: auto 0 var(--space-3);
   text-align: center;
+  margin: 0;
 }
 
 .viewfinder .camera-fallback {
   position: absolute;
   inset: 0;
-  background: #111;
-  color: #fff;
+  background: var(--viewfinder);
+  color: var(--on-dark);
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 0.5rem;
-  padding: 1.5rem;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
 }
 
 .viewfinder .camera-fallback p {
@@ -254,16 +296,14 @@ input {
   max-width: 24rem;
 }
 
-.viewfinder-status {
-  position: absolute;
-  inset: auto 0 0.75rem;
-  text-align: center;
-  margin: 0;
+.camera-code {
+  font-size: var(--text-small);
+  opacity: 0.7;
 }
 
 .capture-row {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .capture-row .capture {
@@ -275,24 +315,35 @@ input {
   color: var(--muted);
 }
 
+.capture-note {
+  margin-top: var(--space-3);
+}
+
+.empty-basket {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+}
+
 .item-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 0.75rem 1rem;
+  padding: var(--space-3) var(--space-4);
 }
 
 .item-info {
   display: grid;
-  gap: 0.125rem;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
 .item-name {
   font-weight: 600;
+  overflow-wrap: break-word;
 }
 
 .item-price {
@@ -301,15 +352,16 @@ input {
 
 .price-label {
   font-style: normal;
-  font-size: 0.75rem;
+  font-size: var(--text-small);
   font-weight: 600;
   padding: 0.0625rem 0.375rem;
-  border-radius: 999px;
-  margin-left: 0.375rem;
+  border-radius: var(--radius-pill);
+  margin-left: var(--space-2);
+  white-space: nowrap;
 }
 
 .price-label-exact {
-  background: #e3f2e7;
+  background: var(--brand-wash);
   color: var(--brand-ink);
 }
 
@@ -321,12 +373,13 @@ input {
 .item-qty {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .item-qty button {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--touch);
+  height: var(--touch);
   padding: 0;
   font-size: 1.25rem;
   line-height: 1;
@@ -336,16 +389,35 @@ input {
   min-width: 1.5rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .basket-actions {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .basket-actions .primary {
   flex: 1;
+}
+
+label.button {
+  display: inline-block;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border: 1px solid var(--brand);
+  cursor: pointer;
+  margin-top: var(--space-4);
+  min-height: var(--touch);
+  line-height: calc(var(--touch) - 2 * var(--space-3) - 2px);
+}
+
+label.button.primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--on-dark);
+  font-weight: 600;
 }
 
 .overlay {
@@ -354,23 +426,35 @@ input {
   background: rgba(27, 27, 27, 0.6);
   display: grid;
   place-items: center;
-  padding: 1rem;
+  padding: var(--space-4);
+  z-index: 10;
 }
 
 .overlay-card {
   background: var(--surface);
   border-radius: var(--radius);
-  padding: 1.5rem;
+  padding: var(--space-6);
   max-width: 24rem;
+  width: 100%;
   text-align: center;
 }
 
 .overlay-card h2 {
   font-size: 1.25rem;
-  margin: 0.75rem 0 0.5rem;
+  margin: var(--space-3) 0 var(--space-2);
 }
 
 .overlay-card p {
   color: var(--muted);
-  margin: 0 0 1.25rem;
+  margin: 0 0 var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .screen {
+    padding-top: var(--space-8);
+  }
+
+  .viewfinder {
+    min-height: 20rem;
+  }
 }
