@@ -13,6 +13,7 @@
   },
   "theme": "system",
   "packages": [
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:pi-plan-task"
   ]
 }
