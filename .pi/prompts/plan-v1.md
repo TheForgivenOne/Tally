@@ -1,3 +1,6 @@
+---
+description: Build the Tally V1 slice step by step
+---
 # Tally V1 build plan
 
 Execute the V1 slice from AGENTS.md. Work in order, one step at a time:

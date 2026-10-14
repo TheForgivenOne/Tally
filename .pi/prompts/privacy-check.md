@@ -1,3 +1,6 @@
+---
+description: Review code against Tally privacy invariants
+---
 # Privacy check
 
 For any schema, API, or storage code under review, verify against the Tally privacy invariants:

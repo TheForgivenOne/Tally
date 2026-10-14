@@ -1,3 +1,6 @@
+---
+description: Review price code against resolution order and error bands
+---
 # Price resolution check
 
 For any price-related code under review, verify:
