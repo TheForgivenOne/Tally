@@ -75,6 +75,8 @@ Server-side only, behind provider interface, only after cache/barcode/tag fail, 
 
 ## Working agreements for Pi
 
+Also follow the global contract in `~/.pi/agent/AGENTS.md`: restate the task + "done" first, plan-then-approve for multi-file work (via `/pt`), PROGRESS.md on large work, no stubs, run-don't-claim (show output), max 3 questions with recommended answers, ask before destructive/irreversible actions.
+
 ### Autonomous skill use (standing instruction — do not wait to be told)
 
 Match tasks to skill descriptions yourself and load matching skills without asking the user. Read a skill's `SKILL.md` only when you start the matched task — never pre-read skill files. If you miss a relevant skill, say so and load it before retrying.
