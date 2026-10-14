@@ -12,7 +12,7 @@ const ENTRY = {
 
 const CATALOG = {
   version: 1,
-  storeId: 'store-mobay-hilo',
+  storeId: 'store-demo-1',
   generatedAt: '2026-10-14T12:00:00.000Z',
   entries: [ENTRY],
 };

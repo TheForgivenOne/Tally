@@ -6,10 +6,10 @@
  * and this file's readFixture() is replaced — the contract + validation stay.
  *
  * Usage:
- *   pnpm --filter @tally/api seed -- --store store-mobay-hilo --out catalog.json
+ *   pnpm --filter @tally/api seed -- --store store-demo-1 --out catalog.json
  *
  * Upload (needs a Cloudflare login — run by a human, never headless):
- *   wrangler r2 object put tally-catalog/store-mobay-hilo.json --file=catalog.json
+ *   wrangler r2 object put tally-catalog/store-demo-1.json --file=catalog.json
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { validateCatalog } from '@tally/shared';

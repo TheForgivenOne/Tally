@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createApp } from './index.js';
 
 const REPORT = {
-  storeId: 'store-mobay-1',
+  storeId: 'store-demo-1',
   barcode: '012345678905',
   name: 'Tastee Cheese 250g',
   priceMinor: 125000,
@@ -62,7 +62,7 @@ describe('GET /prices/resolve', () => {
     const app = createApp();
     await postReport(app, { ...REPORT, source: 'web', priceMinor: 130000, confidence: 0.6 });
     await postReport(app, { ...REPORT, source: 'cache', priceMinor: 125000, confidence: 0.9 });
-    const res = await app.request('/prices/resolve?storeId=store-mobay-1&barcode=012345678905');
+    const res = await app.request('/prices/resolve?storeId=store-demo-1&barcode=012345678905');
     expect(res.status).toBe(200);
     const body = (await res.json()) as { source: unknown; priceMinor: unknown; label: unknown; consensus: unknown; name: unknown };
     expect(body.source).toBe('cache');
@@ -75,14 +75,14 @@ describe('GET /prices/resolve', () => {
   it('labels AI estimates as estimated', async () => {
     const app = createApp();
     await postReport(app, { ...REPORT, source: 'ai', priceMinor: 140000, confidence: 0.4 });
-    const res = await app.request('/prices/resolve?storeId=store-mobay-1&barcode=012345678905');
+    const res = await app.request('/prices/resolve?storeId=store-demo-1&barcode=012345678905');
     const body = (await res.json()) as { source: unknown; label: unknown };
     expect(body.source).toBe('ai');
     expect(body.label).toBe('estimated');
   });
 
   it('returns 404 when nothing is known for the product', async () => {
-    const res = await createApp().request('/prices/resolve?storeId=store-mobay-1&barcode=000000000000');
+    const res = await createApp().request('/prices/resolve?storeId=store-demo-1&barcode=000000000000');
     expect(res.status).toBe(404);
   });
 

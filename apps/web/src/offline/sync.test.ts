@@ -51,7 +51,7 @@ class MemoryCatalog implements CatalogStore {
 
 const CATALOG = {
   version: 1 as const,
-  storeId: 'store-mobay-hilo',
+  storeId: 'store-demo-1',
   generatedAt: '2026-10-14T12:00:00.000Z',
   entries: [
     {
@@ -66,7 +66,7 @@ const CATALOG = {
 };
 
 const REPORT: NewReport = {
-  storeId: 'store-mobay-hilo',
+  storeId: 'store-demo-1',
   barcode: '012345678905',
   priceMinor: 125000,
   source: 'tag',
@@ -139,7 +139,7 @@ describe('connectivity', () => {
 describe('catalog cache', () => {
   it('saves and reads back a validated catalog', async () => {
     await saveCatalog(catalog, CATALOG);
-    expect((await getCatalog(catalog, 'store-mobay-hilo'))?.entries).toHaveLength(1);
+    expect((await getCatalog(catalog, 'store-demo-1'))?.entries).toHaveLength(1);
   });
 
   it('returns null for unknown stores and refuses invalid catalogs', async () => {

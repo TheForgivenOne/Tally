@@ -16,8 +16,8 @@ export function Home() {
 }
 
 const STORES = [
-  { id: 'store-mobay-hilo', name: 'Hi-Lo Montego Bay' },
-  { id: 'store-mobay-megamart', name: 'MegaMart Montego Bay' },
+  { id: 'store-demo-1', name: 'Hi-Lo (demo store)' },
+  { id: 'store-demo-2', name: 'MegaMart (demo store)' },
 ];
 
 export function StorePick() {

@@ -24,7 +24,7 @@ function readTag(app: ReturnType<typeof createApp>, body: unknown, ip = '10.0.0.
   });
 }
 
-const BODY = { imageBase64: IMAGE, storeId: 'store-mobay-hilo', barcode: '012345678905' };
+const BODY = { imageBase64: IMAGE, storeId: 'store-demo-1', barcode: '012345678905' };
 
 describe('POST /prices/read-tag', () => {
   let vision: ReturnType<typeof mockVision>;
@@ -67,7 +67,7 @@ describe('POST /prices/read-tag', () => {
     const app = createApp(undefined, { vision: bad });
     const res = await readTag(app, BODY);
     expect(res.status).toBe(502);
-    const resolve = await app.request('/prices/resolve?storeId=store-mobay-hilo&barcode=012345678905');
+    const resolve = await app.request('/prices/resolve?storeId=store-demo-1&barcode=012345678905');
     expect(resolve.status).toBe(404);
   });
 

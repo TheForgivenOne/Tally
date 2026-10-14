@@ -12,7 +12,7 @@ Jamaican supermarket shoppers on phones, mid-trip, often one-handed, often in br
 
 ## Product Purpose
 
-Tally turns a phone camera into a running basket: point at a shelf tag, get the price, track spend against a budget through the trip. Success is a trip where the shopper is never surprised at the register. It informs; the user decides. (Assumed: first release targets Montego Bay stores.)
+Tally turns a phone camera into a running basket: point at a shelf tag, get the price, track spend against a budget through the trip. Success is a trip where the shopper is never surprised at the register. It informs; the user decides. (Launch town undecided — seed data uses Montego Bay store IDs as placeholders only.)
 
 ## Positioning
 
