@@ -12,6 +12,35 @@ const MAX_DIMENSION = 1024;
 /** Consecutive failures before the guided overlay appears. */
 const OVERLAY_AFTER_FAILURES = 2;
 
+async function blobToBase64(blob: Blob, maxDimension: number): Promise<string | null> {
+  const bitmap = await createImageBitmap(blob).catch(() => null);
+  if (!bitmap) return null;
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    bitmap.close();
+    return null;
+  }
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const out: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+  if (!out) return null;
+  return blobToBase64Raw(out);
+}
+
+async function blobToBase64Raw(blob: Blob): Promise<string> {
+  const buffer = new Uint8Array(await blob.arrayBuffer());
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < buffer.length; i += chunk) {
+    binary += String.fromCharCode(...buffer.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
 async function captureFrame(video: HTMLVideoElement): Promise<string | null> {
   const width = video.videoWidth;
   const height = video.videoHeight;
@@ -25,13 +54,7 @@ async function captureFrame(video: HTMLVideoElement): Promise<string | null> {
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
   if (!blob) return null;
-  const buffer = new Uint8Array(await blob.arrayBuffer());
-  let binary = '';
-  const chunk = 0x8000;
-  for (let i = 0; i < buffer.length; i += chunk) {
-    binary += String.fromCharCode(...buffer.subarray(i, i + chunk));
-  }
-  return btoa(binary);
+  return blobToBase64Raw(blob);
 }
 
 type CameraState = 'starting' | 'live' | 'unavailable';
@@ -89,10 +112,36 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
       setCaptureNote('Could not grab a frame — retake and try again.');
       return;
     }
+    await submitPhoto(imageBase64, video);
+  }
+
+  /** Native camera app path: bypasses WebRTC entirely (NoFrames devices). */
+  async function captureFromFile(file: File) {
+    setCaptureNote(null);
+    if (!storeId) {
+      setCaptureNote('Pick a store first — prices are per store.');
+      return;
+    }
+    if (!isOnline()) {
+      setCaptureNote('You are offline — reconnect to read prices. Cached prices still work.');
+      return;
+    }
+    const imageBase64 = await blobToBase64(file, MAX_DIMENSION);
+    if (!imageBase64) {
+      setCaptureNote('Could not read that photo — try again.');
+      return;
+    }
+    await submitPhoto(imageBase64, null);
+  }
+  async function submitPhoto(imageBase64: string, decodeSource: CanvasImageSource | null) {
+    if (!storeId) {
+      setCaptureNote('Pick a store first — prices are per store.');
+      return;
+    }
     setReading(true);
     try {
       const outcome = await captureFlow(imageBase64, {
-        decodeBarcode: () => getScanner().detect(video),
+        decodeBarcode: () => (decodeSource ? getScanner().detect(decodeSource) : Promise.resolve(null)),
         resolvePrice: async (barcode) => {
           const res = await fetch(
             `${API_BASE}/prices/resolve?storeId=${encodeURIComponent(storeId)}&barcode=${encodeURIComponent(barcode)}`,
@@ -209,6 +258,21 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
             )}
             {cameraError === 'NoFrames' && <p>The camera opened but sent no picture — try another browser.</p>}
             {cameraError !== null && <p className="camera-code">Code: {cameraError}</p>}
+            <label className="button primary" htmlFor="native-capture">
+              Open camera app
+            </label>
+            <input
+              id="native-capture"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = '';
+                if (file) void captureFromFile(file);
+              }}
+            />
           </div>
         )}
         {/* Camera ref must mount in every state so the effect can attach the stream. */}
