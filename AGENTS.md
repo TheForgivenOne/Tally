@@ -77,7 +77,9 @@ Server-side only, behind provider interface, only after cache/barcode/tag fail, 
 
 ### Autonomous skill use (standing instruction — do not wait to be told)
 
-At session start, note available skills from the system prompt (names + descriptions are already in context — do NOT pre-read full `SKILL.md` files). When a task matches a skill's description, read its `SKILL.md` at that point and follow it. Never ask the user whether to load a skill; matching is your job. If a skill was relevant but you failed to load it, say so and load it before retrying.
+How Pi skills work: at startup Pi puts each skill's name, description, and path in the system prompt — full instructions stay out of context. When a task matches, the model reads that path's `SKILL.md` with the read tool and follows it, including its own directives (e.g. "read `references/X` first", run scripts relative to the skill directory). None of our skills set `disable-model-invocation`, so all are eligible for automatic selection.
+
+Your job: match tasks to skill descriptions yourself, every time, without asking the user. When a task matches, read the `SKILL.md` then — never pre-read skill files speculatively, and never ask the user to invoke `/skill:name` for you (that command is their escape hatch, not your workflow). If a skill was relevant but you failed to load it, say so and load it before retrying.
 
 Default mappings (not exhaustive — match on description when in doubt):
 - Writing/reviewing Workers, wrangler, R2, Cron config → `workers-best-practices` + `wrangler`
