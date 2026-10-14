@@ -1,0 +1,306 @@
+/* Tally — light theme for bright aisles. Green brand, ink text, tabular prices. */
+:root {
+  --brand: #1a7f37;
+  --brand-ink: #0d4d20;
+  --ink: #1b1b1b;
+  --muted: #4d4d4d;
+  --surface: #ffffff;
+  --wash: #f2f5f1;
+  --line: #d9ddd6;
+  --amber-bg: #fff4d6;
+  --amber-ink: #6b4a00;
+  --red-bg: #fde7e7;
+  --red-ink: #8f1d1d;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background: var(--wash);
+  line-height: 1.5;
+}
+
+::selection {
+  background: var(--brand);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.screen {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.screen-home {
+  text-align: center;
+  padding-top: 3rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin: 0.75rem 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+button {
+  font: inherit;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--brand);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--brand-ink);
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  font: inherit;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  margin-bottom: 1rem;
+}
+
+.store-list,
+.basket-list {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.store-list button {
+  width: 100%;
+  text-align: left;
+}
+
+.budget-bar {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.budget-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.budget-label {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.budget-amount {
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-track {
+  height: 0.5rem;
+  background: var(--wash);
+  border-radius: 999px;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.budget-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 999px;
+}
+
+.budget-bar[data-warning='amber'] .budget-fill {
+  background: #b07d00;
+}
+
+.budget-bar[data-warning='red'] .budget-fill {
+  background: #b42323;
+}
+
+.budget-warning {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+
+.budget-warning-amber {
+  background: var(--amber-bg);
+  color: var(--amber-ink);
+}
+
+.budget-warning-red {
+  background: var(--red-bg);
+  color: var(--red-ink);
+}
+
+.budget-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.viewfinder {
+  position: relative;
+  background: #111;
+  border-radius: var(--radius);
+  min-height: 16rem;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.viewfinder video {
+  width: 100%;
+  max-height: 24rem;
+  object-fit: cover;
+}
+
+.viewfinder svg {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  opacity: 0.9;
+}
+
+.camera-fallback {
+  padding: 2rem;
+  text-align: center;
+}
+
+.capture-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.capture-row .capture {
+  flex: 1;
+}
+
+.capture-note,
+.empty-basket {
+  color: var(--muted);
+}
+
+.item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+}
+
+.item-info {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.item-name {
+  font-weight: 600;
+}
+
+.item-price {
+  font-variant-numeric: tabular-nums;
+}
+
+.price-label {
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 999px;
+  margin-left: 0.375rem;
+}
+
+.price-label-exact {
+  background: #e3f2e7;
+  color: var(--brand-ink);
+}
+
+.price-label-estimated {
+  background: var(--amber-bg);
+  color: var(--amber-ink);
+}
+
+.item-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.item-qty button {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.item-qty span {
+  min-width: 1.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.basket-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.basket-actions .primary {
+  flex: 1;
+}
