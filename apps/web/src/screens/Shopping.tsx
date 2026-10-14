@@ -147,6 +147,13 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
           await videoRef.current.play().catch(() => undefined);
         }
         setCamera('live');
+        // Watchdog: play() can fail silently (autoplay policy), leaving a
+        // black element. No frames after 3s means honestly unavailable.
+        window.setTimeout(() => {
+          if (!cancelled && (videoRef.current?.videoWidth ?? 0) === 0) {
+            setCamera('unavailable');
+          }
+        }, 3000);
       } catch {
         if (!cancelled) setCamera('unavailable');
       }
