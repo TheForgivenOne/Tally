@@ -4,9 +4,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "echo 'Hono worker not scaffolded yet'",
+    "dev": "wrangler dev",
     "build": "echo 'no build yet'",
-    "typecheck": "echo 'no typecheck yet'",
-    "test": "echo 'no tests yet'"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@tally/shared": "workspace:^",
+    "hono": "^4.13.13",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@hono/zod-validator": "^0.9.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4",
+    "wrangler": "^4.151.0"
   }
 }

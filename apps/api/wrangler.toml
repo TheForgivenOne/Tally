@@ -1,0 +1,16 @@
+# Tally API — Cloudflare Worker. No bindings yet (Neon via HTTPS, R2 later).
+name = "tally-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-14"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+
+[observability.traces]
+enabled = true
+head_sampling_rate = 0.01

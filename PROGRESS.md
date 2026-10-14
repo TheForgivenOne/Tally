@@ -1,7 +1,8 @@
 # Tally — PROGRESS
 
 ## Done
-- V1 step 1: `packages/shared` price foundation — `PriceSource` enum, `PriceObservation` (integer minor units), rank-based `resolvePrice`, `canOverwrite`, age-aware `errorBand`, `priceRange` with register disclaimer. 14 vitest tests, strict `tsc` clean (incl. `noUncheckedIndexedAccess`)
+- V1 step 1: `packages/shared` price foundation — `PriceSource` enum, `PriceObservation` (integer minor units), rank-based `resolvePrice`, `canOverwrite`, age-aware `errorBand`, `priceRange` with register disclaimer. 15 vitest tests (incl. `labelFor`), strict `tsc` clean (incl. `noUncheckedIndexedAccess`)
+- V1 step 2: `apps/api` Hono skeleton — `/health`, `POST /prices/report` (zod-validated, 400 on user/device/coords keys), `GET /prices/resolve` (shared `resolvePrice` + exact/estimated label, consensus stub), `PriceStore` interface + in-memory impl. 11 vitest tests via `app.request()`, strict `tsc` clean, `wrangler types` parses config
 - Workspace: pnpm monorepo (`apps/web`, `apps/api`, `apps/landing`, `packages/shared`), `.gitignore`, README (2026-10-14)
 - Pi config: `AGENTS.md` context, `.pi/settings.json`, `.pi/prompts/` (12 commands), `.pi/mcp.json` (neon/context7/exa)
 - Skills: 25/25 `agent-skills` + hono, workers-best-practices, wrangler, web-perf, vercel-react-best-practices, vercel-composition-patterns, web-design-guidelines, frontend-ui-engineering, supabase-postgres-best-practices, impeccable (34 total)

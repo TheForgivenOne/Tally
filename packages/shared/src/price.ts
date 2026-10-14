@@ -93,6 +93,21 @@ export interface BasketRange {
 
 export const REGISTER_DISCLAIMER = 'Predicted total — register total may differ.';
 
+/** UI label for a price source: ground truth reads are exact, the rest estimated. */
+export type PriceLabel = 'exact' | 'estimated';
+
+export function labelFor(source: PriceSource): PriceLabel {
+  switch (source) {
+    case 'tag':
+    case 'cache':
+    case 'barcode-cache':
+      return 'exact';
+    case 'web':
+    case 'ai':
+      return 'estimated';
+  }
+}
+
 /**
  * Predicted basket total as a range: each line contributes
  * price × qty ± its error band. Integer minor units, rounded.

@@ -3,6 +3,7 @@ import {
   REGISTER_DISCLAIMER,
   canOverwrite,
   errorBand,
+  labelFor,
   priceRange,
   resolvePrice,
   type PriceObservation,
@@ -81,6 +82,16 @@ describe('errorBand', () => {
   it('gives web reference prices ±10% and AI estimates ±25%', () => {
     expect(errorBand(obs({ source: 'web' }), NOW)).toBe(0.1);
     expect(errorBand(obs({ source: 'ai' }), NOW)).toBe(0.25);
+  });
+});
+
+describe('labelFor', () => {
+  it('marks tag and cache reads exact, web and AI estimated', () => {
+    expect(labelFor('tag')).toBe('exact');
+    expect(labelFor('cache')).toBe('exact');
+    expect(labelFor('barcode-cache')).toBe('exact');
+    expect(labelFor('web')).toBe('estimated');
+    expect(labelFor('ai')).toBe('estimated');
   });
 });
 
