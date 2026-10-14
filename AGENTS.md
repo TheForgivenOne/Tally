@@ -77,7 +77,7 @@ Server-side only, behind provider interface, only after cache/barcode/tag fail, 
 
 ### Autonomous skill use (standing instruction — do not wait to be told)
 
-At session start, note available skills from the system prompt. BEFORE acting on any task, load every skill whose description matches — read its `SKILL.md` first, then follow it. Never ask the user whether to load a skill; loading is cheap, guessing is expensive. If a skill was relevant but you failed to load it, say so and load it before retrying.
+At session start, note available skills from the system prompt (names + descriptions are already in context — do NOT pre-read full `SKILL.md` files). When a task matches a skill's description, read its `SKILL.md` at that point and follow it. Never ask the user whether to load a skill; matching is your job. If a skill was relevant but you failed to load it, say so and load it before retrying.
 
 Default mappings (not exhaustive — match on description when in doubt):
 - Writing/reviewing Workers, wrangler, R2, Cron config → `workers-best-practices` + `wrangler`
