@@ -1,10 +1,18 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
-  "defaultTools": ["+codemode", "+grep", "+find", "+ls"],
+  "defaultTools": [
+    "+codemode",
+    "+grep",
+    "+find",
+    "+ls"
+  ],
   "compaction": {
     "enabled": true,
     "reserveTokens": 16384,
     "keepRecentTokens": 20000
   },
-  "theme": "system"
+  "theme": "system",
+  "packages": [
+    "npm:pi-subagents"
+  ]
 }
