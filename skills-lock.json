@@ -55,6 +55,12 @@
       "skillPath": "skills/incremental-implementation/SKILL.md",
       "computedHash": "bb1198705f46dc9ff75fb5685a7a872de5924d743b44eb202135f5046750ab7e"
     },
+    "interview-me": {
+      "source": "TheForgivenOne/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/interview-me/SKILL.md",
+      "computedHash": "4229002dd862e6e037c8a01c3e31d9af097465c58b2c3611912edb2af005f303"
+    },
     "performance-optimization": {
       "source": "TheForgivenOne/agent-skills",
       "sourceType": "github",
