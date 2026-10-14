@@ -62,7 +62,7 @@ Server-side only, behind provider interface, only after cache/barcode/tag fail, 
 
 - Walk target stores: tag contents (barcode/QR/neither)? Any QR→price?
 - Domain/GitHub/trademark check for "Tally" (crowded name).
-- Confirm retailers publishing prices online + terms before pulling.
+- Confirm retailers publishing prices online + terms before pulling. Leads (Oct 2026, via Exa): CAC Jamaica publishes grocery price surveys (cac.gov.jm); PriceSmart Jamaica lists prices online (pricesmart.com/en-jm); PriceRunJA scrapes 5 chains (~45k products) — both a feasibility signal and competition.
 - Confirm Gemini quota/cost + current GCT exemption rules per category.
 - Cold start: seed 150–200 items at 1–2 Montego Bay stores before real users.
 - OCR struggles: glare, curved tags, handwritten stickers → retake flow + tap-to-pick.
