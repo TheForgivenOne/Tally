@@ -38,6 +38,9 @@ Status key: MISSING (not in app) · DIVERGED (in app, different shape) · CLOSE
 - MOTION.md: dock translateY 240ms interruptible, fixed card height (no layout jump),
   no shake on failure. OFFLINE.md: “cached” pill with age; offline miss queues to
   outbox with visible depth. ERRORS.md: states 3–5, 7–9.
+- Copy audit 14 Oct: wireframe failed-state now matches deck #3 verbatim; app
+  `Shopping.tsx` captureNote strings predate the deck — align to ERRORS.md states
+  2/3/6 at build.
 
 ## Screen 4 · Total: remaining-hero + composition — MISSING
 - App has: `BudgetBar` (range + % bar, amber ≥80% / red ≥100%).
