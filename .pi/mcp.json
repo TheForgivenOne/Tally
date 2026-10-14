@@ -3,6 +3,16 @@
     "neon": {
       "url": "https://mcp.neon.tech/mcp",
       "description": "Neon Postgres management (projects, branches, databases, SQL). Used for Tally's shared price database. Requires sign-in via /mcp."
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "exposure": "deferred",
+      "description": "Up-to-date library and framework docs (Hono, Drizzle, Vite, React, Astro). Use when writing or checking framework code."
+    },
+    "exa": {
+      "url": "https://mcp.exa.ai/mcp",
+      "exposure": "deferred",
+      "description": "Web search and page fetching. Use for retailer price-page checks, GCT rules, and Jamaica Data Protection Act research."
     }
   }
 }
