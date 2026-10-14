@@ -75,6 +75,22 @@ Server-side only, behind provider interface, only after cache/barcode/tag fail, 
 
 ## Working agreements for Pi
 
+### Autonomous skill use (standing instruction — do not wait to be told)
+
+At session start, note available skills from the system prompt. BEFORE acting on any task, load every skill whose description matches — read its `SKILL.md` first, then follow it. Never ask the user whether to load a skill; loading is cheap, guessing is expensive. If a skill was relevant but you failed to load it, say so and load it before retrying.
+
+Default mappings (not exhaustive — match on description when in doubt):
+- Writing/reviewing Workers, wrangler, R2, Cron config → `workers-best-practices` + `wrangler`
+- Any Hono code (routes, middleware, validation) → `hono`
+- Any Postgres/Neon/Drizzle schema, migration, or query → `supabase-postgres-best-practices`
+- Any React component, PWA screen, or UI review → `vercel-react-best-practices` + `vercel-composition-patterns` (+ `frontend-ui-engineering` for new screens, `web-design-guidelines` for review passes)
+- Multi-file feature work → `planning-and-task-breakdown`, then `incremental-implementation`
+- New logic or behavior change → `test-driven-development`; before merge → `code-review-and-quality`
+- Untrusted input, auth, privacy-adjacent code → `security-and-hardening`
+- Perf budgets, Worker CPU, bundle size, Core Web Vitals → `performance-optimization` (+ `web-perf` for web)
+- API shapes, shared contracts → `api-and-interface-design`; anything failing → `debugging-and-error-recovery`; messy but working code → `code-simplification`; every commit → `git-workflow-and-versioning`
+- Framework docs in doubt → Context7 MCP (`query_docs`); external facts (retailers, GCT, DPA) → Exa MCP.
+
 Available skills (`.agents/skills/`, auto-loaded): `hono`, `workers-best-practices`, `wrangler`, `web-perf` (API + PWA perf); `vercel-react-best-practices`, `vercel-composition-patterns`, `web-design-guidelines`, `frontend-ui-engineering` (web UI); `supabase-postgres-best-practices` (Neon/Postgres schema); workflow: `planning-and-task-breakdown`, `incremental-implementation`, `test-driven-development`, `code-review-and-quality`, `debugging-and-error-recovery`, `code-simplification`, `api-and-interface-design`, `security-and-hardening`, `performance-optimization`, `git-workflow-and-versioning` (all from `TheForgivenOne/agent-skills`). MCP: `neon` remote server in `.pi/mcp.json` (OAuth — run `/mcp login neon` in an interactive session).
 
 - Small, reviewable diffs. Monorepo-aware edits (shared logic lives in `packages/shared`, never duplicated).
