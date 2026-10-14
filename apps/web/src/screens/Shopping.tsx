@@ -143,8 +143,23 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
           return;
         }
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => undefined);
+          const video = videoRef.current;
+          video.srcObject = stream;
+          // MDN: muted/playsinline must be properties, not just attributes —
+          // React's muted attribute alone does not flip the property on iOS.
+          video.muted = true;
+          video.playsInline = true;
+          await new Promise<void>((resolve) => {
+            const done = () => {
+              video.removeEventListener('playing', done);
+              resolve();
+            };
+            video.addEventListener('playing', done);
+            void video.play().catch(() => resolve());
+            // play() resolving is not frames. Cap the wait.
+            window.setTimeout(() => resolve(), 3000);
+          });
+          if (cancelled) return;
         }
         setCamera('live');
         // Watchdog: play() can fail silently (autoplay policy), leaving a
