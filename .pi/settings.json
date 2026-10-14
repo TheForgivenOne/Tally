@@ -14,6 +14,7 @@
   "theme": "system",
   "packages": [
     "npm:pi-subagents",
-    "npm:pi-plan-task"
+    "npm:pi-plan-task",
+    "npm:pi-goal"
   ]
 }
