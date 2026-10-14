@@ -31,7 +31,7 @@ describe('POST /prices/report', () => {
   it('accepts a valid anonymous report', async () => {
     const res = await postReport(createApp(), REPORT);
     expect(res.status).toBe(201);
-    const body = await res.json();
+    const body = (await res.json()) as { id: unknown; source: unknown };
     expect(body.id).toBeTypeOf('string');
     expect(body.source).toBe('tag');
   });
@@ -64,7 +64,7 @@ describe('GET /prices/resolve', () => {
     await postReport(app, { ...REPORT, source: 'cache', priceMinor: 125000, confidence: 0.9 });
     const res = await app.request('/prices/resolve?storeId=store-mobay-1&barcode=012345678905');
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as { source: unknown; priceMinor: unknown; label: unknown; consensus: unknown };
     expect(body.source).toBe('cache');
     expect(body.priceMinor).toBe(125000);
     expect(body.label).toBe('exact');
@@ -75,7 +75,7 @@ describe('GET /prices/resolve', () => {
     const app = createApp();
     await postReport(app, { ...REPORT, source: 'ai', priceMinor: 140000, confidence: 0.4 });
     const res = await app.request('/prices/resolve?storeId=store-mobay-1&barcode=012345678905');
-    const body = await res.json();
+    const body = (await res.json()) as { source: unknown; label: unknown };
     expect(body.source).toBe('ai');
     expect(body.label).toBe('estimated');
   });
@@ -94,6 +94,6 @@ describe('unknown routes', () => {
   it('returns JSON 404', async () => {
     const res = await createApp().request('/nope');
     expect(res.status).toBe(404);
-    expect((await res.json()).message).toBeTypeOf('string');
+    expect(((await res.json()) as { message: unknown }).message).toBeTypeOf('string');
   });
 });

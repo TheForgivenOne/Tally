@@ -4,3 +4,4 @@
 
 export * from './price.js';
 export * from './catalog.js';
+export * from './vision.js';
