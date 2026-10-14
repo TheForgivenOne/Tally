@@ -5,7 +5,11 @@
   "main": "./src/index.ts",
   "scripts": {
     "build": "echo 'no build yet'",
-    "typecheck": "echo 'no typecheck yet'",
-    "test": "echo 'no tests yet'"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
   }
 }

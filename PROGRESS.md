@@ -1,6 +1,7 @@
 # Tally — PROGRESS
 
 ## Done
+- V1 step 1: `packages/shared` price foundation — `PriceSource` enum, `PriceObservation` (integer minor units), rank-based `resolvePrice`, `canOverwrite`, age-aware `errorBand`, `priceRange` with register disclaimer. 14 vitest tests, strict `tsc` clean (incl. `noUncheckedIndexedAccess`)
 - Workspace: pnpm monorepo (`apps/web`, `apps/api`, `apps/landing`, `packages/shared`), `.gitignore`, README (2026-10-14)
 - Pi config: `AGENTS.md` context, `.pi/settings.json`, `.pi/prompts/` (12 commands), `.pi/mcp.json` (neon/context7/exa)
 - Skills: 25/25 `agent-skills` + hono, workers-best-practices, wrangler, web-perf, vercel-react-best-practices, vercel-composition-patterns, web-design-guidelines, frontend-ui-engineering, supabase-postgres-best-practices, impeccable (34 total)
