@@ -22,6 +22,7 @@
 - Manual Cloudflare steps (need login, never headless): `wrangler secret put OPENAI_API_KEY`, `wrangler r2 object put tally-catalog/<store>.json --file=...`
 
 ## Known issues
+- Camera verified live on-device (dual-video ref bug fixed; SW edge-cache pin documented above)
 - Neon free tier cold-starts after 5 min idle (slow first query)
 - `.pi/mcp.json` ignored until project trusted in interactive session; headless runs need `pi --approve`
 - `browser-testing-with-devtools` skill dormant until Chrome DevTools MCP configured
