@@ -86,6 +86,15 @@ describe('GET /prices/resolve', () => {
     expect(res.status).toBe(404);
   });
 
+  it('reports consensus once two matching reports agree', async () => {
+    const app = createApp();
+    await postReport(app, REPORT);
+    await postReport(app, { ...REPORT, observedAt: '2026-10-14T13:00:00.000Z' });
+    const res = await app.request('/prices/resolve?storeId=store-demo-1&barcode=012345678905');
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { consensus: unknown }).consensus).toBe(true);
+  });
+
   it('requires storeId and barcode', async () => {
     expect((await createApp().request('/prices/resolve')).status).toBe(400);
   });

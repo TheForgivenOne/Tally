@@ -1,4 +1,4 @@
-import { labelFor, resolvePrice, validateCatalog, validateTagRead } from '@tally/shared';
+import { hasConsensus, labelFor, resolvePrice, validateCatalog, validateTagRead } from '@tally/shared';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -126,7 +126,8 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
 
   app.get('/prices/resolve', zValidator('query', resolveQuerySchema), async (c) => {
     const { storeId, barcode } = c.req.valid('query');
-    const winner = resolvePrice(await store.list(storeId, barcode));
+    const observations = await store.list(storeId, barcode);
+    const winner = resolvePrice(observations);
     if (!winner) return c.json({ message: 'No price known for this product at this store' }, 404);
     return c.json({
       barcode,
@@ -137,8 +138,7 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
       observedAt: winner.observedAt,
       confidence: winner.confidence,
       label: labelFor(winner.source),
-      // Stub: true once 2+ matching reports agree. See consensus derivation (step 2b).
-      consensus: false,
+      consensus: hasConsensus(observations),
     });
   });
 

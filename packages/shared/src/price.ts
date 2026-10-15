@@ -56,6 +56,17 @@ export function resolvePrice<T extends PriceObservation>(observations: T[]): T |
 }
 
 /**
+ * Whether two or more observations agree with the winning price.
+ * Consensus, not reputation: anonymous data cannot prove distinct reporters,
+ * so agreement means 2+ reports at the exact winning minor-unit price.
+ */
+export function hasConsensus<T extends PriceObservation>(observations: T[]): boolean {
+  const winner = resolvePrice(observations);
+  if (!winner) return false;
+  return observations.filter((o) => o.priceMinor === winner.priceMinor).length >= 2;
+}
+
+/**
  * Whether `incoming` may replace `existing` as the current price.
  * Higher-authority sources always win; equal ranks go to the newest.
  */

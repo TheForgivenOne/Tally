@@ -3,6 +3,7 @@ import {
   REGISTER_DISCLAIMER,
   canOverwrite,
   errorBand,
+  hasConsensus,
   labelFor,
   priceRange,
   resolvePrice,
@@ -48,6 +49,27 @@ describe('resolvePrice', () => {
 
   it('returns undefined when there are no observations', () => {
     expect(resolvePrice([])).toBeUndefined();
+  });
+});
+
+describe('hasConsensus', () => {
+  it('is false with no observations or a single report', () => {
+    expect(hasConsensus([])).toBe(false);
+    expect(hasConsensus([obs({ source: 'tag' })])).toBe(false);
+  });
+
+  it('is true when two reports match the winning price', () => {
+    expect(hasConsensus([obs({ source: 'tag' }), obs({ source: 'cache' })])).toBe(true);
+  });
+
+  it('is false when the pair disagrees with the winner', () => {
+    expect(
+      hasConsensus([
+        obs({ source: 'tag', priceMinor: 1200 }),
+        obs({ source: 'ai', priceMinor: 1000 }),
+        obs({ source: 'ai', priceMinor: 1000 }),
+      ]),
+    ).toBe(false);
   });
 });
 
