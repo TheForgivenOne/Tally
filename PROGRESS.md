@@ -18,6 +18,7 @@
 - V1 step 14: photo cache — `PhotoCache` seam (memory/Drizzle over `ai_results` hash index, photos never stored); identical bytes replay without model call or budget; barcode-late replays store on arrival; `ai_results` audit rows now written. Tests caught a per-request-cache bug pre-commit. 32 api tests with env, `tsc` clean
 - V1 step 15: verification sweep — secret scan clean, no stubs/TODOs in prod paths, full gates green (22 shared / 36 web / 32 api with live Neon, zero leftover rows), PWA + landing + worker dry-run builds pass; web auth client sends credentials for cross-origin cookies
 - V1 step 16: real consensus — `hasConsensus` in shared (2+ reports at the exact winning price, per the locked consensus-not-reputation rule); resolve route returns it instead of the hardcoded stub. 25 shared / 33 api tests, `tsc` clean
+- V1 step 17: installable PWA — mascot-derived icon.svg + generated 192/512/maskable PNGs (stdlib-only generator, pixel-verified), manifest wired, shell precache covers them; landing re-verified tracker-free. Web build + tests green
 - Pi config: `AGENTS.md` context, `.pi/settings.json`, `.pi/prompts/` (12 commands), `.pi/mcp.json` (neon/context7/exa)
 - Skills: 25/25 `agent-skills` + hono, workers-best-practices, wrangler, web-perf, vercel-react-best-practices, vercel-composition-patterns, web-design-guidelines, frontend-ui-engineering, supabase-postgres-best-practices, impeccable (34 total)
 - Review agents: `.pi/agents/` ×4 (inherit project context)
