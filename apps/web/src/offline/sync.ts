@@ -1,4 +1,4 @@
-import { validateCatalog, type StoreCatalog } from '@tally/shared';
+import { validateCatalog, type PriceSource, type StoreCatalog } from '@tally/shared';
 
 export type ReportSource = 'cache' | 'tag' | 'barcode-cache' | 'web' | 'ai';
 
@@ -77,6 +77,54 @@ export async function saveCatalog(store: CatalogStore, catalog: unknown): Promis
 /** Latest cached catalog for a store, or null when never cached. */
 export async function getCatalog(store: CatalogStore, storeId: string): Promise<StoreCatalog | null> {
   return store.get(storeId);
+}
+
+export interface CachedPrice {
+  barcode: string;
+  name: string;
+  priceMinor: number;
+  source: PriceSource;
+  observedAt: string;
+  confidence: number;
+}
+
+/** Cache-first lookup: the device/server cache step of the resolution order. */
+export function resolveFromCatalog(catalog: StoreCatalog | null, barcode: string): CachedPrice | null {
+  const entry = catalog?.entries.find((e) => e.barcode === barcode) ?? null;
+  if (!entry) return null;
+  return {
+    barcode: entry.barcode,
+    name: entry.name,
+    priceMinor: entry.priceMinor,
+    source: entry.source,
+    observedAt: entry.observedAt,
+    confidence: entry.confidence,
+  };
+}
+
+/**
+ * Fetch the store catalog and cache it on-device. Resolves false when
+ * offline or the server has nothing usable — callers treat the cache
+ * as best-effort, never as a gate.
+ */
+export async function refreshCatalog(
+  apiBase: string,
+  store: CatalogStore,
+  storeId: string,
+): Promise<boolean> {
+  let res: Response;
+  try {
+    res = await fetch(`${apiBase}/catalog/${encodeURIComponent(storeId)}`);
+  } catch {
+    return false;
+  }
+  if (!res.ok) return false;
+  try {
+    await saveCatalog(store, await res.json());
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** True when the browser reports connectivity. Server components default true. */

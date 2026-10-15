@@ -1,4 +1,4 @@
-import { labelFor, resolvePrice, validateTagRead } from '@tally/shared';
+import { labelFor, resolvePrice, validateCatalog, validateTagRead } from '@tally/shared';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -111,6 +111,27 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
       // Stub: true once 2+ matching reports agree. See consensus derivation (step 2b).
       consensus: false,
     });
+  });
+
+  /**
+   * Per-store catalog for offline caching (powers the web outbox flow).
+   * Always validated against the shared contract before responding —
+   * an empty store yields zero entries, never an error.
+   */
+  app.get('/catalog/:storeId', async (c) => {
+    const storeId = c.req.param('storeId');
+    if (!storeId) return c.json({ message: 'Invalid store' }, 400);
+    const checked = validateCatalog({
+      version: 1,
+      storeId,
+      generatedAt: new Date().toISOString(),
+      entries: await store.catalog(storeId),
+    });
+    if (!checked.ok) {
+      console.error(JSON.stringify({ message: 'catalog contract violation', error: checked.error }));
+      return c.json({ message: 'Internal Server Error' }, 500);
+    }
+    return c.json(checked.catalog);
   });
 
   app.post('/prices/read-tag', async (c) => {

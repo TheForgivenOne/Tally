@@ -5,6 +5,8 @@ import {
   flushOutbox,
   getCatalog,
   isOnline,
+  refreshCatalog,
+  resolveFromCatalog,
   saveCatalog,
   subscribeOnline,
   type CatalogStore,
@@ -140,6 +142,31 @@ describe('catalog cache', () => {
   it('saves and reads back a validated catalog', async () => {
     await saveCatalog(catalog, CATALOG);
     expect((await getCatalog(catalog, 'store-demo-1'))?.entries).toHaveLength(1);
+  });
+
+  it('resolves a cached price by barcode and misses honestly', async () => {
+    await saveCatalog(catalog, CATALOG);
+    const hit = resolveFromCatalog(await getCatalog(catalog, 'store-demo-1'), '012345678905');
+    expect(hit?.priceMinor).toBe(125000);
+    expect(hit?.source).toBe('tag');
+    expect(resolveFromCatalog(await getCatalog(catalog, 'store-demo-1'), '000000000000')).toBeNull();
+    expect(resolveFromCatalog(null, '012345678905')).toBeNull();
+  });
+
+  it('refreshes the cache from the catalog endpoint', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => CATALOG }));
+    expect(await refreshCatalog('https://api.example.test', catalog, 'store-demo-1')).toBe(true);
+    expect(resolveFromCatalog(await getCatalog(catalog, 'store-demo-1'), '012345678905')?.name).toBe(
+      'Tastee Cheese 250g',
+    );
+  });
+
+  it('returns false without caching when offline or the server errs', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    expect(await refreshCatalog('https://api.example.test', catalog, 'store-demo-1')).toBe(false);
+    expect(await getCatalog(catalog, 'store-demo-1')).toBeNull();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }));
+    expect(await refreshCatalog('https://api.example.test', catalog, 'store-demo-1')).toBe(false);
   });
 
   it('returns null for unknown stores and refuses invalid catalogs', async () => {

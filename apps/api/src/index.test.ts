@@ -91,6 +91,33 @@ describe('GET /prices/resolve', () => {
   });
 });
 
+describe('GET /catalog/:storeId', () => {
+  it('serves one winning entry per product in contract shape', async () => {
+    const app = createApp();
+    await postReport(app, { ...REPORT, source: 'ai', priceMinor: 140000, confidence: 0.4 });
+    await postReport(app, { ...REPORT, source: 'tag', priceMinor: 125000, confidence: 0.95 });
+    const res = await app.request('/catalog/store-demo-1');
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      version: unknown;
+      storeId: unknown;
+      generatedAt: unknown;
+      entries: Array<{ barcode: unknown; name: unknown; priceMinor: unknown; source: unknown }>;
+    };
+    expect(body.version).toBe(1);
+    expect(body.storeId).toBe('store-demo-1');
+    expect(body.entries.length).toBe(1);
+    expect(body.entries[0]?.source).toBe('tag');
+    expect(body.entries[0]?.priceMinor).toBe(125000);
+  });
+
+  it('returns an empty catalog for an unknown store', async () => {
+    const res = await createApp().request('/catalog/store-nope');
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { entries: unknown[] }).entries).toEqual([]);
+  });
+});
+
 describe('unknown routes', () => {
   it('returns JSON 404', async () => {
     const res = await createApp().request('/nope');

@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import { and, desc, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { resolvePrice } from '@tally/shared';
+import { resolvePrice, type CatalogEntry } from '@tally/shared';
 import { currentPrices, priceObservations, products, stores } from './schema.js';
 import type { PriceStore, StoredObservation } from './store.js';
 
@@ -91,6 +91,32 @@ export class DrizzlePriceStore implements PriceStore {
     return stored;
   }
 
+  async catalog(storeId: string): Promise<CatalogEntry[]> {
+    const rows = await this.db
+      .select({
+        barcode: currentPrices.barcode,
+        name: products.name,
+        brand: products.brand,
+        size: products.size,
+        priceMinor: currentPrices.priceMinor,
+        source: currentPrices.source,
+        observedAt: currentPrices.observedAt,
+        confidence: currentPrices.confidence,
+      })
+      .from(currentPrices)
+      .innerJoin(products, eq(products.barcode, currentPrices.barcode))
+      .where(eq(currentPrices.storeId, storeId));
+    return rows.map((r) => ({
+      barcode: r.barcode,
+      name: r.name,
+      ...(r.brand !== null ? { brand: r.brand } : {}),
+      ...(r.size !== null ? { size: r.size } : {}),
+      priceMinor: r.priceMinor,
+      source: r.source as CatalogEntry['source'],
+      observedAt: r.observedAt.toISOString(),
+      confidence: r.confidence,
+    }));
+  }
   async list(storeId: string, barcode: string): Promise<StoredObservation[]> {
     const rows = await this.db
       .select({

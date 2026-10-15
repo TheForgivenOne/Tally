@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useShop } from '../basket.js';
 import { BudgetBar } from '../components/BudgetBar.js';
 import { Mascot } from '../components/Mascot.js';
-import { isOnline, subscribeOnline } from '../offline/sync.js';
+import { dexieCatalog, dexieOutbox } from '../offline/db.js';
+import { flushOutbox, getCatalog, isOnline, refreshCatalog, resolveFromCatalog, subscribeOnline } from '../offline/sync.js';
 import { DetectorScanner, type BarcodeScanner } from '../scan.js';
 import { CannotReadOverlay } from './CannotReadOverlay.js';
 import { captureFlow, type ResolvedItem, type TagItem } from './captureFlow.js';
@@ -72,6 +73,15 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
   const [failures, setFailures] = useState(0);
 
   useEffect(() => subscribeOnline(() => setOnline(isOnline())), []);
+
+  // Offline engine, live: while online, refresh the cached catalog and
+  // flush queued reports — so the offline note below tells the truth.
+  // Best-effort by design: failures stay silent, the cache stays stale.
+  useEffect(() => {
+    if (!storeId || !online) return;
+    void refreshCatalog(API_BASE, dexieCatalog, storeId).catch(() => undefined);
+    void flushOutbox(dexieOutbox, API_BASE).catch(() => undefined);
+  }, [storeId, online]);
 
   function getScanner(): BarcodeScanner {
     if (!scannerRef.current) scannerRef.current = new DetectorScanner();
@@ -143,6 +153,9 @@ export function Shopping({ scanner }: { scanner?: BarcodeScanner }) {
       const outcome = await captureFlow(imageBase64, {
         decodeBarcode: () => (decodeSource ? getScanner().detect(decodeSource) : Promise.resolve(null)),
         resolvePrice: async (barcode) => {
+          // Resolution order, step 1: device cache before any network.
+          const cached = resolveFromCatalog(await dexieCatalog.get(storeId).catch(() => null), barcode);
+          if (cached) return cached;
           const res = await fetch(
             `${API_BASE}/prices/resolve?storeId=${encodeURIComponent(storeId)}&barcode=${encodeURIComponent(barcode)}`,
           );
