@@ -11,22 +11,22 @@ export interface StoredObservation extends PriceObservation {
   promo?: boolean;
 }
 
-/** Ports-and-adapters boundary: routes depend on this, Neon implements it later. */
+/** Ports-and-adapters boundary: routes depend on this, Neon implements it. Async: Postgres in prod, memory in tests. */
 export interface PriceStore {
-  add(record: Omit<StoredObservation, 'id'>): StoredObservation;
-  list(storeId: string, barcode: string): StoredObservation[];
+  add(record: Omit<StoredObservation, 'id'>): Promise<StoredObservation>;
+  list(storeId: string, barcode: string): Promise<StoredObservation[]>;
 }
 
 export class MemoryPriceStore implements PriceStore {
   private records: StoredObservation[] = [];
 
-  add(record: Omit<StoredObservation, 'id'>): StoredObservation {
+  async add(record: Omit<StoredObservation, 'id'>): Promise<StoredObservation> {
     const stored: StoredObservation = { ...record, id: crypto.randomUUID() };
     this.records.push(stored);
     return stored;
   }
 
-  list(storeId: string, barcode: string): StoredObservation[] {
+  async list(storeId: string, barcode: string): Promise<StoredObservation[]> {
     return this.records.filter((r) => r.storeId === storeId && r.barcode === barcode);
   }
 }

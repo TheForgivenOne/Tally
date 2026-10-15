@@ -8,6 +8,7 @@
 - V1 step 5: tag OCR path — `TagRead` contract in shared; `VisionProvider` + OpenAI-compatible impl (Gemini + any OpenAI backend) in api; `POST /prices/read-tag` (1.5MB guard, 429 caps, generic 502s, images never stored, barcode-less reads return unstored); web capture live (canvas downscale → POST → item card, honest errors). 22 shared + 18 api + 17 web tests, `tsc` clean, `vite build` green, impeccable `detect` clean
 - V1 step 6: barcode — `BarcodeScanner` seam (native-first, zxing ponyfill code-split) + pure `captureFlow` (decode→resolve→tag→failed); resolve returns name/brand; can't-read SVG diagram overlay after 2 failures; Shopping rewired. 22 shared + 18 api + 23 web tests, `tsc` clean, `vite build` green, impeccable `detect` clean
 - Workspace: pnpm monorepo (`apps/web`, `apps/api`, `apps/landing`, `packages/shared`), `.gitignore`, README (2026-10-14)
+- V1 step 7: Neon persistence — Drizzle schema (`stores` PostGIS point, `products`, append-only `price_observations` with CHECKs, `current_prices`, `ai_results`, `tag_crops` cropped-only) migrated to live Neon; `PriceStore` async; `DrizzlePriceStore` (FK-safe parent upserts) wired as production Worker entry per `DATABASE_URL` secret with memory fallback; privacy audit clean (no user/device/location columns). 19 api tests (incl. live-Neon integration, skipped without env), `tsc` clean
 - Pi config: `AGENTS.md` context, `.pi/settings.json`, `.pi/prompts/` (12 commands), `.pi/mcp.json` (neon/context7/exa)
 - Skills: 25/25 `agent-skills` + hono, workers-best-practices, wrangler, web-perf, vercel-react-best-practices, vercel-composition-patterns, web-design-guidelines, frontend-ui-engineering, supabase-postgres-best-practices, impeccable (34 total)
 - Review agents: `.pi/agents/` ×4 (inherit project context)
@@ -16,7 +17,8 @@
 - Retailer lead (via Exa): CAC price surveys, PriceSmart online prices, PriceRunJA competition — in AGENTS.md
 
 ## Next
-- V1 kickoff: `/spec` or `/pt` for `packages/shared` price types + confidence logic (step 1 of `/plan-v1`)
+- Deploy wiring (manual, human with Cloudflare login): `wrangler secret put DATABASE_URL`, `wrangler secret put OPENAI_API_KEY`, seed `current_prices` derivation + R2 catalog upload per store
+- `apps/landing` Astro scaffold
 - `/mcp login neon` (interactive session — OAuth)
 - First push = security gate: audit secrets, push private first (per contract §7)
 - Manual Cloudflare steps (need login, never headless): `wrangler secret put OPENAI_API_KEY`, `wrangler r2 object put tally-catalog/<store>.json --file=...`

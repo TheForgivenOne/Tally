@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { MemoryPriceStore, type PriceStore } from './store.js';
+import { DrizzlePriceStore, openDb } from './db.js';
 import { MemoryCaps, OpenAICompatibleVision, type VisionProvider } from './vision.js';
 
 /** Keys that must never appear on shared routes. Anonymous data only. */
@@ -23,6 +24,8 @@ type Bindings = Cloudflare.Env & {
   OPENAI_BASE_URL?: string;
   OPENAI_API_KEY?: string;
   VISION_MODEL?: string;
+  /** Neon connection string. Set via `wrangler secret put DATABASE_URL` (never in source). */
+  DATABASE_URL?: string;
 };
 
 const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/openai';
@@ -88,13 +91,13 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
     if (!parsed.success) {
       return c.json({ message: 'Invalid price report' }, 400);
     }
-    const stored = store.add(parsed.data);
+    const stored = await store.add(parsed.data);
     return c.json(stored, 201);
   });
 
-  app.get('/prices/resolve', zValidator('query', resolveQuerySchema), (c) => {
+  app.get('/prices/resolve', zValidator('query', resolveQuerySchema), async (c) => {
     const { storeId, barcode } = c.req.valid('query');
-    const winner = resolvePrice(store.list(storeId, barcode));
+    const winner = resolvePrice(await store.list(storeId, barcode));
     if (!winner) return c.json({ message: 'No price known for this product at this store' }, 404);
     return c.json({
       barcode,
@@ -185,7 +188,7 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
         200,
       );
     }
-    const stored = store.add({
+    const stored = await store.add({
       storeId: parsed.data.storeId,
       barcode: parsed.data.barcode,
       name: checked.read.name,
@@ -210,4 +213,28 @@ const app = createApp();
 
 export type AppType = typeof app;
 
-export default app;
+/**
+ * Production entry: one cached Hono app per DATABASE_URL value.
+ * With the secret set, every route reads/writes Neon via DrizzlePriceStore;
+ * without it (tests, `wrangler dev` with no secret) it falls back to the
+ * in-memory store. The cache holds immutable app instances only —
+ * no per-request state ever lives at module level.
+ */
+const appCache = new Map<string, typeof app>();
+
+function appFor(env: Bindings): typeof app {
+  const key = env.DATABASE_URL ?? 'memory';
+  const cached = appCache.get(key);
+  if (cached) return cached;
+  const built = env.DATABASE_URL
+    ? createApp(new DrizzlePriceStore(openDb(env.DATABASE_URL)))
+    : app;
+  appCache.set(key, built);
+  return built;
+}
+
+export default {
+  fetch(request: Request, env: Bindings, ctx: ExecutionContext) {
+    return appFor(env).fetch(request, env, ctx);
+  },
+};
