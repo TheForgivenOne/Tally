@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 import { z } from 'zod';
 import { createAuth, type TallyAuth } from './auth.js';
 import { cleanupExpiredAuth } from './cleanup.js';
+import { MemoryEdgeCache, WorkersEdgeCache, type EdgeCache } from './edge-cache.js';
 import { MemoryPriceStore, type PriceStore } from './store.js';
 import { DrizzleCaps, DrizzlePhotoCache, DrizzlePriceStore, openDb } from './db.js';
 import { MemoryCaps, MemoryPhotoCache, OpenAICompatibleVision, type Caps, type PhotoCache, type VisionProvider } from './vision.js';
@@ -87,6 +88,8 @@ export interface ApiDeps {
   caps?: Caps;
   /** Photo cache. When absent, an in-memory cache serves this app instance. */
   photoCache?: PhotoCache;
+  /** Edge cache for hot reads. Absent = in-memory (tests, dev). */
+  edgeCache?: EdgeCache;
   /** Anonymous-device auth. When absent, auth routes 404 and caps fall back to IP. */
   auth?: TallyAuth;
   /** Explicit web origins for cookie CORS (mirrors BETTER_AUTH trustedOrigins). */
@@ -97,6 +100,7 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
   const app = new Hono<{ Bindings: Bindings }>();
   const caps = deps.caps ?? new MemoryCaps();
   const photoCache = deps.photoCache ?? new MemoryPhotoCache();
+  const edgeCache = deps.edgeCache ?? new MemoryEdgeCache();
 
   app.get('/health', (c) => c.json({ status: 'ok' }));
 
@@ -150,6 +154,17 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
   app.get('/catalog/:storeId', async (c) => {
     const storeId = c.req.param('storeId');
     if (!storeId) return c.json({ message: 'Invalid store' }, 400);
+    // Edge cache first: catalogs move slowly and every client revalidates
+    // against Dexie anyway. Sixty seconds of staleness buys large Neon
+    // savings at zero correctness cost to the resolution order.
+    const cacheKey = c.req.url;
+    const hit = await edgeCache.match(cacheKey).catch(() => null);
+    if (hit) {
+      const body = (await hit.json()) as unknown;
+      if (typeof body === 'object' && body !== null) {
+        return c.json(body, 200, { 'X-Cache': 'HIT' });
+      }
+    }
     const checked = validateCatalog({
       version: 1,
       storeId,
@@ -160,7 +175,9 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
       console.error(JSON.stringify({ message: 'catalog contract violation', error: checked.error }));
       return c.json({ message: 'Internal Server Error' }, 500);
     }
-    return c.json(checked.catalog);
+    const res = c.json(checked.catalog, 200, { 'X-Cache': 'MISS' });
+    await edgeCache.put(cacheKey, res.clone()).catch(() => undefined);
+    return res;
   });
 
   app.post('/prices/read-tag', async (c) => {
@@ -347,6 +364,7 @@ function appFor(env: Bindings): typeof app {
       built = createApp(store, {
         caps,
         photoCache,
+        edgeCache: new WorkersEdgeCache(),
         auth: createAuth(db, {
           secret: env.BETTER_AUTH_SECRET,
           ...(env.BETTER_AUTH_URL ? { baseURL: env.BETTER_AUTH_URL } : {}),

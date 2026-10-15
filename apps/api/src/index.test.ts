@@ -120,6 +120,18 @@ describe('GET /catalog/:storeId', () => {
     expect(body.entries[0]?.priceMinor).toBe(125000);
   });
 
+  it('serves repeat catalogs from the edge cache', async () => {
+    const app = createApp();
+    await postReport(app, REPORT);
+    const first = await app.request('/catalog/store-demo-1');
+    expect(first.status).toBe(200);
+    expect(first.headers.get('X-Cache')).toBe('MISS');
+    const second = await app.request('/catalog/store-demo-1');
+    expect(second.status).toBe(200);
+    expect(second.headers.get('X-Cache')).toBe('HIT');
+    expect(await second.json()).toEqual(await first.json());
+  });
+
   it('returns an empty catalog for an unknown store', async () => {
     const res = await createApp().request('/catalog/store-nope');
     expect(res.status).toBe(200);
