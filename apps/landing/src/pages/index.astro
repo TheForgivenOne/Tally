@@ -1,0 +1,152 @@
+---
+import { steps } from '../steps.js';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Tally turns a phone camera into a running grocery basket: point at a shelf tag, track spend against a budget, never be surprised at the register."
+    />
+    <title>Tally — know your total before the register does</title>
+    <style>
+      :root {
+        --green: #1a7f37;
+        --ink: #14210f;
+        --paper: #fbfbef;
+        --card: #ffffff;
+        --line: #d8dcc8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 3rem 1.25rem 4rem;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+      }
+      .badge svg {
+        width: 2rem;
+        height: 2rem;
+      }
+      h1 {
+        font-size: clamp(2rem, 6vw, 3rem);
+        line-height: 1.15;
+        margin: 1.5rem 0 0.75rem;
+      }
+      .lede {
+        font-size: 1.2rem;
+        margin: 0 0 2rem;
+      }
+      .cta {
+        display: inline-block;
+        background: var(--green);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 0.9rem 1.6rem;
+        border-radius: 0.75rem;
+        text-decoration: none;
+        min-height: 44px;
+      }
+      .reassure {
+        margin: 0.75rem 0 3rem;
+        font-size: 0.95rem;
+      }
+      ol.steps {
+        list-style: none;
+        margin: 0 0 3rem;
+        padding: 0;
+        display: grid;
+        gap: 1rem;
+      }
+      ol.steps li {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+      }
+      ol.steps h2 {
+        margin: 0 0 0.25rem;
+        font-size: 1.1rem;
+      }
+      ol.steps p {
+        margin: 0;
+      }
+      .privacy {
+        border-top: 1px solid var(--line);
+        padding-top: 1.5rem;
+        font-size: 0.95rem;
+      }
+      footer {
+        margin-top: 2rem;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="badge">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="2" y="2" width="28" height="28" rx="7" fill="#1a7f37"></rect>
+          <path
+            d="M10 22 L22 10 M10 10 L22 22 M10 16 L22 16"
+            stroke="#fbfbef"
+            stroke-width="2.5"
+            stroke-linecap="round"></path>
+        </svg>
+        Tally
+      </p>
+      <h1>Know your total before the register does.</h1>
+      <p class="lede">
+        Tally turns a phone camera into a running basket for Jamaican supermarket
+        trips: point at a shelf tag, track spend against a budget, mid-trip,
+        one-handed. It informs — you decide.
+      </p>
+      <a class="cta" href="#how">See how it works</a>
+      <p class="reassure">Works offline · No account · Free web app</p>
+
+      <ol class="steps" id="how">
+        {
+          steps.map((step, i) => (
+            <li>
+              <h2>
+                {i + 1}. {step.title}
+              </h2>
+              <p>{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <section class="privacy" aria-label="Privacy">
+        <h2>Your data stays yours</h2>
+        <p>
+          Trips and budgets live on your phone. Prices you contribute are
+          anonymous — no accounts, no location trail. Shelf photos are never
+          stored, and receipt images are discarded after reading.
+        </p>
+      </section>
+
+      <footer>
+        <p>Tally is in early testing in Jamaican supermarkets.</p>
+      </footer>
+    </main>
+  </body>
+</html>

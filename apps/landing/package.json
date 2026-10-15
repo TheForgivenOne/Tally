@@ -4,7 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "echo 'Astro landing not scaffolded yet'",
-    "build": "echo 'no build yet'"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo 'landing is static: build is the test'"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "astro": "^7.3.8"
   }
 }
