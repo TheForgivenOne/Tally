@@ -4,13 +4,19 @@ export interface VisionProvider {
   readTag(image: Uint8Array, mimeType: string): Promise<unknown>;
 }
 
-/** In-memory per-day caps. Durable (per-device, persisted) caps land later. */
-export class MemoryCaps {
+/** Per-day spend of a capped resource. Memory for tests/dev, Postgres in prod. */
+export interface Caps {
+  /** Consume one unit for `key`, false when the daily limit is reached. */
+  take(key: string): Promise<boolean>;
+}
+
+/** In-memory per-day caps. Resets on restart — prod uses DrizzleCaps. */
+export class MemoryCaps implements Caps {
   private counts = new Map<string, number>();
 
   constructor(private readonly limitPerDay: number = 50) {}
 
-  take(key: string): boolean {
+  async take(key: string): Promise<boolean> {
     const used = this.counts.get(key) ?? 0;
     if (used >= this.limitPerDay) return false;
     this.counts.set(key, used + 1);

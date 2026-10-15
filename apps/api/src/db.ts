@@ -1,9 +1,10 @@
 import { neon } from '@neondatabase/serverless';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, lt, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { resolvePrice, type CatalogEntry } from '@tally/shared';
-import { currentPrices, priceObservations, products, stores } from './schema.js';
+import { currentPrices, priceObservations, products, stores, tagReadCaps } from './schema.js';
 import type { PriceStore, StoredObservation } from './store.js';
+import type { Caps } from './vision.js';
 
 export type NeonDb = ReturnType<typeof drizzle>;
 
@@ -169,4 +170,42 @@ function toStored(row: ObservationRow): StoredObservation {
     confidence: row.confidence,
     ...(row.promo ? { promo: true as const } : {}),
   };
+}
+
+/**
+ * Postgres-backed daily caps. Atomic increment per (key, day); stale days
+ * are swept on each take so the table stays tiny without a cron job.
+ */
+export class DrizzleCaps implements Caps {
+  constructor(
+    private readonly db: NeonDb,
+    private readonly limitPerDay: number = 50,
+  ) {}
+
+  async take(key: string): Promise<boolean> {
+    const day = dayOf(key);
+    const rows = await this.db
+      .insert(tagReadCaps)
+      .values({ key, day, count: 1 })
+      .onConflictDoUpdate({
+        target: [tagReadCaps.key, tagReadCaps.day],
+        set: { count: sql`${tagReadCaps.count} + 1`, updatedAt: new Date() },
+      })
+      .returning({ count: tagReadCaps.count });
+    const count = rows[0]?.count ?? this.limitPerDay + 1;
+    // Best-effort hygiene; failure here must never block a legit read.
+    await this.db.delete(tagReadCaps).where(lt(tagReadCaps.day, daysAgo(2))).catch(() => undefined);
+    return count <= this.limitPerDay;
+  }
+}
+
+/** The caller composes keys as `<scheme>:<id>:<YYYY-MM-DD>` — the tail is the day. */
+function dayOf(key: string): string {
+  return key.split(':').slice(-1)[0] ?? 'unknown';
+}
+
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
 }

@@ -5,8 +5,8 @@ import { cors } from 'hono/cors';
 import { z } from 'zod';
 import { createAuth, type TallyAuth } from './auth.js';
 import { MemoryPriceStore, type PriceStore } from './store.js';
-import { DrizzlePriceStore, openDb } from './db.js';
-import { MemoryCaps, OpenAICompatibleVision, type VisionProvider } from './vision.js';
+import { DrizzleCaps, DrizzlePriceStore, openDb } from './db.js';
+import { MemoryCaps, OpenAICompatibleVision, type Caps, type VisionProvider } from './vision.js';
 
 /** Keys that must never appear on shared routes. Anonymous data only. */
 const FORBIDDEN_KEYS = new Set([
@@ -77,7 +77,7 @@ function forbiddenKeys(raw: unknown): string[] {
 
 export interface ApiDeps {
   vision?: VisionProvider;
-  caps?: MemoryCaps;
+  caps?: Caps;
   /** Anonymous-device auth. When absent, auth routes 404 and caps fall back to IP. */
   auth?: TallyAuth;
   /** Explicit web origins for cookie CORS (mirrors BETTER_AUTH trustedOrigins). */
@@ -180,7 +180,7 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
       const session = await deps.auth.api.getSession({ headers: c.req.raw.headers }).catch(() => null);
       if (session) capsKey = `device:${session.user.id}:${day}`;
     }
-    if (!caps.take(capsKey)) {
+    if (!(await caps.take(capsKey))) {
       return c.json({ message: 'Daily tag-read limit reached' }, 429);
     }
 
@@ -278,12 +278,14 @@ function appFor(env: Bindings): typeof app {
   if (env.DATABASE_URL) {
     const db = openDb(env.DATABASE_URL);
     const store = new DrizzlePriceStore(db);
+    const caps = new DrizzleCaps(db);
     if (env.BETTER_AUTH_SECRET) {
       const origins = (env.TRUSTED_ORIGINS ?? '')
         .split(',')
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
       built = createApp(store, {
+        caps,
         auth: createAuth(db, {
           secret: env.BETTER_AUTH_SECRET,
           ...(env.BETTER_AUTH_URL ? { baseURL: env.BETTER_AUTH_URL } : {}),
@@ -292,7 +294,7 @@ function appFor(env: Bindings): typeof app {
         ...(origins.length > 0 ? { authOrigins: origins } : {}),
       });
     } else {
-      built = createApp(store);
+      built = createApp(store, { caps });
     }
   } else {
     built = app;

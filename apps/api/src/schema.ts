@@ -130,3 +130,21 @@ export const tagCrops = pgTable('tag_crops', {
     .notNull()
     .default(sql`now()`),
 });
+
+/**
+ * Durable per-day tag-read counters. `key` already encodes the identity
+ * scheme (`device:<id>:<day>` or `ip:<ip>:<day>` — see index.ts), so this
+ * table holds no identities of its own, only opaque counters.
+ */
+export const tagReadCaps = pgTable(
+  'tag_read_caps',
+  {
+    key: text('key').notNull(),
+    day: text('day').notNull(),
+    count: integer('count').notNull().default(1),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [uniqueIndex('tag_read_caps_key_day_idx').on(t.key, t.day)],
+);
