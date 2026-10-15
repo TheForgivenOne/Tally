@@ -6,9 +6,9 @@ Supportive shopping assistant for Jamaican supermarkets. Phone camera → price 
 
 Monorepo (`pnpm`):
 
-- `apps/web` — Vite + React PWA (planned)
-- `apps/api` — Hono on Cloudflare Workers (planned)
-- `apps/landing` — Astro landing page (planned)
+- `apps/web` — Vite + React PWA (camera capture, basket + budget, offline catalog cache)
+- `apps/api` — Hono on Cloudflare Workers (price report/resolve, tag OCR, catalog, anonymous-device auth, scheduled cleanup)
+- `apps/landing` — Astro static landing page
 - `packages/shared` — types, validation, resolution + confidence logic
 
 ## Pi setup
@@ -24,4 +24,7 @@ After editing Pi config, run `/reload` in interactive Pi.
 
 ## Status
 
-Planning done, no app code written yet. Next: run `/plan-v1` step 1 (`packages/shared` price types + confidence logic).
+V1 built and tested (see PROGRESS.md, currently step 15): persistent Neon
+price DB, offline catalog, anonymous-device auth, durable caps, photo cache.
+Next: deploy per DEPLOY.md (needs logins), then receipt scanning per
+PLAN-receipts.md (awaiting approval).
