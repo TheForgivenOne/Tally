@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { z } from 'zod';
 import { createAuth, type TallyAuth } from './auth.js';
+import { cleanupExpiredAuth } from './cleanup.js';
 import { MemoryPriceStore, type PriceStore } from './store.js';
 import { DrizzleCaps, DrizzlePriceStore, openDb } from './db.js';
 import { MemoryCaps, OpenAICompatibleVision, type Caps, type VisionProvider } from './vision.js';
@@ -306,5 +307,11 @@ function appFor(env: Bindings): typeof app {
 export default {
   fetch(request: Request, env: Bindings, ctx: ExecutionContext) {
     return appFor(env).fetch(request, env, ctx);
+  },
+  /** Daily cron (see [triggers] in wrangler.toml): sweep expired auth rows. */
+  async scheduled(_event: ScheduledEvent, env: Bindings, _ctx: ExecutionContext) {
+    if (!env.DATABASE_URL) return;
+    const counts = await cleanupExpiredAuth(openDb(env.DATABASE_URL));
+    console.log(JSON.stringify({ message: 'auth cleanup', ...counts }));
   },
 };

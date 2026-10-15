@@ -14,6 +14,7 @@
 - V1 step 10: offline engine live — API `GET /catalog/:storeId` (contract-validated, `PriceStore.catalog` on memory + Drizzle) feeds the web cache: Shopping refreshes the Dexie catalog + flushes the outbox when online, resolves cache-first per the price order. 21 api / 34 web tests, `tsc` clean
 - V1 step 11: anonymous-device auth — Better Auth + anonymous plugin on Drizzle/Neon (`auth_*` tables, never joined to price data); tag-read caps keyed per device with IP fallback; web signs in silently at startup; live-Neon tests prove per-device capping across IPs. Needs `wrangler secret put BETTER_AUTH_SECRET` at deploy. 24 api / 36 web tests, `tsc` clean
 - V1 step 12: durable tag caps — `Caps` seam (memory for tests, `DrizzleCaps` upsert in Neon in prod); stale days swept on take; live-Neon tests prove limit, key isolation, sweep. 26 api tests with env, `tsc` clean
+- V1 step 13: auth cleanup cron — `cleanupExpiredAuth` sweeps expired sessions/verifications + orphaned anonymous users; `scheduled` handler + daily `[triggers]` cron in wrangler.toml (dry-run validates, fires after deploy). 27 api tests with env, `tsc` clean
 - Pi config: `AGENTS.md` context, `.pi/settings.json`, `.pi/prompts/` (12 commands), `.pi/mcp.json` (neon/context7/exa)
 - Skills: 25/25 `agent-skills` + hono, workers-best-practices, wrangler, web-perf, vercel-react-best-practices, vercel-composition-patterns, web-design-guidelines, frontend-ui-engineering, supabase-postgres-best-practices, impeccable (34 total)
 - Review agents: `.pi/agents/` ×4 (inherit project context)

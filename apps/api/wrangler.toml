@@ -14,3 +14,7 @@ head_sampling_rate = 1
 [observability.traces]
 enabled = true
 head_sampling_rate = 0.01
+
+# Daily auth sweep (expired sessions/verifications, orphaned anonymous users).
+[triggers]
+crons = ["0 4 * * *"]
