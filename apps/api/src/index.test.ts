@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createApp } from './index.js';
+import { MemoryCaps } from './vision.js';
 
 const REPORT = {
   storeId: 'store-demo-1',
@@ -93,6 +94,13 @@ describe('GET /prices/resolve', () => {
     const res = await app.request('/prices/resolve?storeId=store-demo-1&barcode=012345678905');
     expect(res.status).toBe(200);
     expect(((await res.json()) as { consensus: unknown }).consensus).toBe(true);
+  });
+
+  it('caps anonymous reports per device per day with 429', async () => {
+    const app = createApp(undefined, { reportCaps: new MemoryCaps(2) });
+    expect((await postReport(app, REPORT)).status).toBe(201);
+    expect((await postReport(app, { ...REPORT, priceMinor: 126000 })).status).toBe(201);
+    expect((await postReport(app, { ...REPORT, priceMinor: 127000 })).status).toBe(429);
   });
 
   it('requires storeId and barcode', async () => {

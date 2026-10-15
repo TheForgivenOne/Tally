@@ -20,6 +20,7 @@
 - V1 step 16: real consensus — `hasConsensus` in shared (2+ reports at the exact winning price, per the locked consensus-not-reputation rule); resolve route returns it instead of the hardcoded stub. 25 shared / 33 api tests, `tsc` clean
 - V1 step 17: installable PWA — mascot-derived icon.svg + generated 192/512/maskable PNGs (stdlib-only generator, pixel-verified), manifest wired, shell precache covers them; landing re-verified tracker-free. Web build + tests green
 - V1 step 18: edge-cached catalog — `EdgeCache` seam (memory/Workers Cache API, 60s TTL) fronts `GET /catalog/:storeId` with HIT/MISS headers; prod wires `caches.default`, cutting Neon reads for the hottest endpoint. 34 api tests, `tsc` clean
+- V1 step 19: report abuse guard — `POST /prices/report` capped per device/IP (200/day, same identity scheme as tag reads, Drizzle-backed in prod); flood test pins 201/201/429. 35 api tests, `tsc` clean
 - Pi config: `AGENTS.md` context, `.pi/settings.json`, `.pi/prompts/` (12 commands), `.pi/mcp.json` (neon/context7/exa)
 - Skills: 25/25 `agent-skills` + hono, workers-best-practices, wrangler, web-perf, vercel-react-best-practices, vercel-composition-patterns, web-design-guidelines, frontend-ui-engineering, supabase-postgres-best-practices, impeccable (34 total)
 - Review agents: `.pi/agents/` ×4 (inherit project context)

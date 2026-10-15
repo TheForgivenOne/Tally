@@ -86,6 +86,12 @@ function forbiddenKeys(raw: unknown): string[] {
 export interface ApiDeps {
   vision?: VisionProvider;
   caps?: Caps;
+  /**
+   * Abuse guard for anonymous writes. Generous on purpose: a big trip
+   * reports dozens of prices; floods report thousands. Shares the device
+   * identity scheme with tag-read caps (see read-tag route).
+   */
+  reportCaps?: Caps;
   /** Photo cache. When absent, an in-memory cache serves this app instance. */
   photoCache?: PhotoCache;
   /** Edge cache for hot reads. Absent = in-memory (tests, dev). */
@@ -100,6 +106,7 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
   const app = new Hono<{ Bindings: Bindings }>();
   const caps = deps.caps ?? new MemoryCaps();
   const photoCache = deps.photoCache ?? new MemoryPhotoCache();
+  const reportCaps = deps.reportCaps ?? new MemoryCaps(200);
   const edgeCache = deps.edgeCache ?? new MemoryEdgeCache();
 
   app.get('/health', (c) => c.json({ status: 'ok' }));
@@ -123,6 +130,16 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
     const parsed = reportSchema.safeParse(raw);
     if (!parsed.success) {
       return c.json({ message: 'Invalid price report' }, 400);
+    }
+    const ip = c.req.header('cf-connecting-ip') ?? 'anon';
+    const day = new Date().toISOString().slice(0, 10);
+    let reportKey = `report-ip:${ip}:${day}`;
+    if (deps.auth) {
+      const session = await deps.auth.api.getSession({ headers: c.req.raw.headers }).catch(() => null);
+      if (session) reportKey = `report-device:${session.user.id}:${day}`;
+    }
+    if (!(await reportCaps.take(reportKey))) {
+      return c.json({ message: 'Daily report limit reached' }, 429);
     }
     const stored = await store.add(parsed.data);
     return c.json(stored, 201);
@@ -363,6 +380,7 @@ function appFor(env: Bindings): typeof app {
         .filter((s) => s.length > 0);
       built = createApp(store, {
         caps,
+        reportCaps: new DrizzleCaps(db, 200),
         photoCache,
         edgeCache: new WorkersEdgeCache(),
         auth: createAuth(db, {
