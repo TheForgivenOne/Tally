@@ -102,19 +102,27 @@ export const currentPrices = pgTable(
 );
 
 /** AI vision results, stored with confidence for audit + shrinking AI use. */
-export const aiResults = pgTable('ai_results', {
-  id: uuid('id')
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  storeId: text('store_id').references(() => stores.id),
-  barcode: text('barcode'),
-  priceMinor: integer('price_minor').notNull(),
-  confidence: real('confidence').notNull(),
-  model: text('model').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
-});
+export const aiResults = pgTable(
+  'ai_results',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    storeId: text('store_id').references(() => stores.id),
+    barcode: text('barcode'),
+    /** Product name as read, for cache replays without a model call. */
+    name: text('name'),
+    priceMinor: integer('price_minor').notNull(),
+    confidence: real('confidence').notNull(),
+    model: text('model').notNull(),
+    /** SHA-256 of the tag photo bytes. The photo itself is never stored. */
+    imageHash: text('image_hash'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index('ai_results_image_hash_idx').on(t.imageHash)],
+);
 
 /**
  * Cropped tag images only (R2 keys). Never whole shelf photos.

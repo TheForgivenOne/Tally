@@ -11,7 +11,7 @@ const BARCODE = '012345678905';
 const STORE = 'store-caps-check';
 
 function stubVision(): VisionProvider {
-  return { readTag: async () => ({ priceMinor: 125000, name: 'Caps Check', confidence: 0.9 }) };
+  return { modelName: () => 'test-model', readTag: async () => ({ priceMinor: 125000, name: 'Caps Check', confidence: 0.9 }) };
 }
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -65,7 +65,9 @@ describe('auth routes without auth configured', () => {
       caps: new MemoryCaps(1),
     });
     let userId = '';
-    const tagBody = { imageBase64: IMAGE, storeId: STORE, barcode: BARCODE };
+    // Distinct photos: identical bytes replay from the photo cache without
+    // spending budget, so caps assertions need distinct images.
+    const photo = (n: string) => ({ imageBase64: btoa(`caps-photo-${n}`), storeId: STORE, barcode: BARCODE });
     const json = { 'Content-Type': 'application/json' };
     try {
       const signIn = await app.request('http://localhost/api/auth/sign-in/anonymous', {
@@ -79,20 +81,20 @@ describe('auth routes without auth configured', () => {
       const me = (await (await app.request('http://localhost/api/auth/get-session', { headers: authed })).json()) as { user: { id: string } };
       userId = me.user.id;
 
-      const first = await app.request('/prices/read-tag', { method: 'POST', headers: authed, body: JSON.stringify(tagBody) });
+      const first = await app.request('/prices/read-tag', { method: 'POST', headers: authed, body: JSON.stringify(photo('one')) });
       expect(first.status).toBe(201);
       // Same device, second read: capped even from a fresh IP.
       const second = await app.request('/prices/read-tag', {
         method: 'POST',
         headers: { ...authed, 'cf-connecting-ip': '9.9.9.9' },
-        body: JSON.stringify(tagBody),
+        body: JSON.stringify(photo('two')),
       });
       expect(second.status).toBe(429);
       // A sessionless device on another IP keeps its own budget.
       const stranger = await app.request('/prices/read-tag', {
         method: 'POST',
         headers: { ...json, 'cf-connecting-ip': '8.8.8.8' },
-        body: JSON.stringify(tagBody),
+        body: JSON.stringify(photo('three')),
       });
       expect(stranger.status).toBe(201);
     } finally {

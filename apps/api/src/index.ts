@@ -6,8 +6,8 @@ import { z } from 'zod';
 import { createAuth, type TallyAuth } from './auth.js';
 import { cleanupExpiredAuth } from './cleanup.js';
 import { MemoryPriceStore, type PriceStore } from './store.js';
-import { DrizzleCaps, DrizzlePriceStore, openDb } from './db.js';
-import { MemoryCaps, OpenAICompatibleVision, type Caps, type VisionProvider } from './vision.js';
+import { DrizzleCaps, DrizzlePhotoCache, DrizzlePriceStore, openDb } from './db.js';
+import { MemoryCaps, MemoryPhotoCache, OpenAICompatibleVision, type Caps, type PhotoCache, type VisionProvider } from './vision.js';
 
 /** Keys that must never appear on shared routes. Anonymous data only. */
 const FORBIDDEN_KEYS = new Set([
@@ -71,6 +71,12 @@ const readTagSchema = z
   })
   .strict();
 
+/** SHA-256 hex of raw bytes. Runs on Workers (WebCrypto) and Node alike. */
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', bytes as BufferSource);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 function forbiddenKeys(raw: unknown): string[] {
   if (typeof raw !== 'object' || raw === null) return [];
   return Object.keys(raw).filter((k) => FORBIDDEN_KEYS.has(k));
@@ -79,6 +85,8 @@ function forbiddenKeys(raw: unknown): string[] {
 export interface ApiDeps {
   vision?: VisionProvider;
   caps?: Caps;
+  /** Photo cache. When absent, an in-memory cache serves this app instance. */
+  photoCache?: PhotoCache;
   /** Anonymous-device auth. When absent, auth routes 404 and caps fall back to IP. */
   auth?: TallyAuth;
   /** Explicit web origins for cookie CORS (mirrors BETTER_AUTH trustedOrigins). */
@@ -88,6 +96,7 @@ export interface ApiDeps {
 export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiDeps = {}) {
   const app = new Hono<{ Bindings: Bindings }>();
   const caps = deps.caps ?? new MemoryCaps();
+  const photoCache = deps.photoCache ?? new MemoryPhotoCache();
 
   app.get('/health', (c) => c.json({ status: 'ok' }));
 
@@ -171,6 +180,50 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
       return c.json({ message: 'Image too large — resize in the browser first' }, 413);
     }
 
+    let bytes: Uint8Array;
+    try {
+      const binary = atob(parsed.data.imageBase64);
+      bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
+    } catch {
+      return c.json({ message: 'Invalid tag-read request' }, 400);
+    }
+    // Photo cache first: identical bytes replay without a model call and
+    // without spending daily budget. Only hashes touch the disk — photos
+    // are never stored, whole or cropped.
+    const imageHash = await sha256Hex(bytes);
+    const replay = await photoCache.lookup(imageHash).catch(() => null);
+    if (replay && replay.storeId === parsed.data.storeId) {
+      if (!parsed.data.barcode || replay.barcode === parsed.data.barcode) {
+        return c.json(
+          {
+            barcode: replay.barcode ?? '',
+            name: replay.name ?? 'Shelf item',
+            priceMinor: replay.priceMinor,
+            source: 'tag',
+            observedAt: replay.observedAt,
+            confidence: replay.confidence,
+            label: labelFor('tag'),
+            stored: replay.barcode !== null,
+            cached: true,
+          },
+          200,
+        );
+      }
+      // Same photo, now with a barcode: the first read could not store it,
+      // so store now — still no model call, no budget spent.
+      const stored = await store.add({
+        storeId: parsed.data.storeId,
+        barcode: parsed.data.barcode,
+        ...(replay.name !== null ? { name: replay.name } : {}),
+        priceMinor: replay.priceMinor,
+        source: 'tag',
+        observedAt: replay.observedAt,
+        confidence: replay.confidence,
+      });
+      await photoCache.save({ ...replay, barcode: parsed.data.barcode, imageHash }).catch(() => undefined);
+      return c.json({ ...stored, label: labelFor('tag'), stored: true, cached: true }, 201);
+    }
+
     const ip = c.req.header('cf-connecting-ip') ?? 'anon';
     const day = new Date().toISOString().slice(0, 10);
     // Per-device caps when the device holds an anonymous session, else
@@ -198,14 +251,6 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
       return c.json({ message: 'Tag reading is not configured' }, 503);
     }
 
-    let bytes: Uint8Array;
-    try {
-      const binary = atob(parsed.data.imageBase64);
-      bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
-    } catch {
-      return c.json({ message: 'Invalid tag-read request' }, 400);
-    }
-
     let modelOutput: unknown;
     try {
       modelOutput = await vision.readTag(bytes, 'image/jpeg');
@@ -217,6 +262,19 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
     if (!checked.ok) {
       return c.json({ message: 'Tag read failed — retake the photo and try again' }, 502);
     }
+    // Audit + future replays. Best-effort: a cache failure never fails a good read.
+    await photoCache
+      .save({
+        storeId: parsed.data.storeId,
+        barcode: parsed.data.barcode ?? null,
+        name: checked.read.name ?? null,
+        priceMinor: checked.read.priceMinor,
+        confidence: checked.read.confidence,
+        model: vision.modelName(),
+        observedAt: new Date().toISOString(),
+        imageHash,
+      })
+      .catch(() => undefined);
 
     // Bytes go out of scope here — images are never stored, whole or cropped.
     // Without a barcode the read cannot join the shared dataset (one bogus
@@ -280,6 +338,7 @@ function appFor(env: Bindings): typeof app {
     const db = openDb(env.DATABASE_URL);
     const store = new DrizzlePriceStore(db);
     const caps = new DrizzleCaps(db);
+    const photoCache = new DrizzlePhotoCache(db);
     if (env.BETTER_AUTH_SECRET) {
       const origins = (env.TRUSTED_ORIGINS ?? '')
         .split(',')
@@ -287,6 +346,7 @@ function appFor(env: Bindings): typeof app {
         .filter((s) => s.length > 0);
       built = createApp(store, {
         caps,
+        photoCache,
         auth: createAuth(db, {
           secret: env.BETTER_AUTH_SECRET,
           ...(env.BETTER_AUTH_URL ? { baseURL: env.BETTER_AUTH_URL } : {}),
@@ -295,7 +355,7 @@ function appFor(env: Bindings): typeof app {
         ...(origins.length > 0 ? { authOrigins: origins } : {}),
       });
     } else {
-      built = createApp(store, { caps });
+      built = createApp(store, { caps, photoCache });
     }
   } else {
     built = app;

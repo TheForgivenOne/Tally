@@ -2,6 +2,8 @@
 export interface VisionProvider {
   /** Raw model output. The route validates it via shared `validateTagRead`. */
   readTag(image: Uint8Array, mimeType: string): Promise<unknown>;
+  /** Model id for audit rows (e.g. 'gemini-2.0-flash', 'test-model'). */
+  modelName(): string;
 }
 
 /** Per-day spend of a capped resource. Memory for tests/dev, Postgres in prod. */
@@ -10,6 +12,51 @@ export interface Caps {
   take(key: string): Promise<boolean>;
 }
 
+/** A cached tag read: the same photo bytes replay without a model call. */
+export interface CachedTagRead {
+  storeId: string;
+  barcode: string | null;
+  name: string | null;
+  priceMinor: number;
+  confidence: number;
+  model: string;
+  observedAt: string;
+}
+
+export interface NewTagRead extends CachedTagRead {
+  imageHash: string;
+}
+
+/** Photo cache. Memory for tests/dev, Postgres in prod. */
+export interface PhotoCache {
+  /** A fresh (≤30d) read for these exact photo bytes, or null. */
+  lookup(imageHash: string): Promise<CachedTagRead | null>;
+  /** Persist a validated read for audit + future replays. Failures must not throw. */
+  save(read: NewTagRead): Promise<void>;
+}
+
+/** Freshness window for photo replays. Tunable; prices move, tags fade. */
+export const PHOTO_CACHE_DAYS = 30;
+
+/** In-memory photo cache. Resets on restart — prod uses DrizzlePhotoCache. */
+export class MemoryPhotoCache implements PhotoCache {
+  private rows = new Map<string, { read: CachedTagRead; at: number }>();
+
+  async lookup(imageHash: string): Promise<CachedTagRead | null> {
+    const hit = this.rows.get(imageHash);
+    if (!hit) return null;
+    if (Date.now() - hit.at > PHOTO_CACHE_DAYS * 86_400_000) {
+      this.rows.delete(imageHash);
+      return null;
+    }
+    return hit.read;
+  }
+
+  async save(read: NewTagRead): Promise<void> {
+    const { imageHash, ...rest } = read;
+    this.rows.set(imageHash, { read: rest, at: Date.now() });
+  }
+}
 /** In-memory per-day caps. Resets on restart — prod uses DrizzleCaps. */
 export class MemoryCaps implements Caps {
   private counts = new Map<string, number>();
@@ -36,6 +83,10 @@ export interface OpenAICompatEnv {
  */
 export class OpenAICompatibleVision implements VisionProvider {
   constructor(private readonly env: OpenAICompatEnv) {}
+
+  modelName(): string {
+    return this.env.model;
+  }
 
   async readTag(image: Uint8Array, mimeType: string): Promise<unknown> {
     let binary = '';

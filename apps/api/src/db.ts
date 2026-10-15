@@ -1,10 +1,11 @@
 import { neon } from '@neondatabase/serverless';
-import { and, desc, eq, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, lt, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { resolvePrice, type CatalogEntry } from '@tally/shared';
-import { currentPrices, priceObservations, products, stores, tagReadCaps } from './schema.js';
+import { aiResults, currentPrices, priceObservations, products, stores, tagReadCaps } from './schema.js';
 import type { PriceStore, StoredObservation } from './store.js';
-import type { Caps } from './vision.js';
+import type { CachedTagRead, Caps, NewTagRead, PhotoCache } from './vision.js';
+import { PHOTO_CACHE_DAYS } from './vision.js';
 
 export type NeonDb = ReturnType<typeof drizzle>;
 
@@ -208,4 +209,58 @@ function daysAgo(n: number): string {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() - n);
   return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Postgres-backed photo cache over ai_results. Only hashes touch the disk —
+ * photos are never stored. Stale rows stay as audit trail; lookup ignores
+ * anything older than PHOTO_CACHE_DAYS.
+ */
+export class DrizzlePhotoCache implements PhotoCache {
+  constructor(private readonly db: NeonDb) {}
+
+  async lookup(imageHash: string): Promise<CachedTagRead | null> {
+    const cutoff = new Date(Date.now() - PHOTO_CACHE_DAYS * 86_400_000);
+    const rows = await this.db
+      .select({
+        storeId: aiResults.storeId,
+        barcode: aiResults.barcode,
+        name: aiResults.name,
+        priceMinor: aiResults.priceMinor,
+        confidence: aiResults.confidence,
+        model: aiResults.model,
+        observedAt: aiResults.createdAt,
+      })
+      .from(aiResults)
+      .where(and(eq(aiResults.imageHash, imageHash), gt(aiResults.createdAt, cutoff)))
+      .orderBy(desc(aiResults.createdAt))
+      .limit(1);
+    const row = rows[0];
+    if (!row || !row.storeId) return null;
+    return {
+      storeId: row.storeId,
+      barcode: row.barcode,
+      name: row.name,
+      priceMinor: row.priceMinor,
+      confidence: row.confidence,
+      model: row.model,
+      observedAt: row.observedAt.toISOString(),
+    };
+  }
+
+  async save(read: NewTagRead): Promise<void> {
+    try {
+      await this.db.insert(aiResults).values({
+        storeId: read.storeId,
+        barcode: read.barcode,
+        name: read.name,
+        priceMinor: read.priceMinor,
+        confidence: read.confidence,
+        model: read.model,
+        imageHash: read.imageHash,
+      });
+    } catch {
+      // Audit must never break a read that already succeeded.
+    }
+  }
 }

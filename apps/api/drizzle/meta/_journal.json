@@ -29,6 +29,13 @@
       "when": 1792070630766,
       "tag": "0003_tag-caps",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792070858576,
+      "tag": "0004_photo-cache",
+      "breakpoints": true
     }
   ]
 }
