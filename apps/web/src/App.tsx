@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { ShopProvider, useShop, type Screen } from './basket.js';
+import { ensureDeviceSession } from './auth.js';
 import { BasketScreen, EndTrip } from './screens/Basket.js';
 import { Shopping } from './screens/Shopping.js';
 import { Budget, Home, StorePick } from './screens/Start.js';
@@ -26,6 +28,9 @@ function Shell() {
 }
 
 export function App() {
+  useEffect(() => {
+    void ensureDeviceSession();
+  }, []);
   return (
     <ShopProvider>
       <Shell />

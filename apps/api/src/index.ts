@@ -1,7 +1,9 @@
 import { labelFor, resolvePrice, validateCatalog, validateTagRead } from '@tally/shared';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { z } from 'zod';
+import { createAuth, type TallyAuth } from './auth.js';
 import { MemoryPriceStore, type PriceStore } from './store.js';
 import { DrizzlePriceStore, openDb } from './db.js';
 import { MemoryCaps, OpenAICompatibleVision, type VisionProvider } from './vision.js';
@@ -26,6 +28,12 @@ type Bindings = Cloudflare.Env & {
   VISION_MODEL?: string;
   /** Neon connection string. Set via `wrangler secret put DATABASE_URL` (never in source). */
   DATABASE_URL?: string;
+  /** Session signing secret. Set via `wrangler secret put BETTER_AUTH_SECRET`. */
+  BETTER_AUTH_SECRET?: string;
+  /** Public origin of this API (cookie anchor). */
+  BETTER_AUTH_URL?: string;
+  /** Comma-separated web origins allowed cookie auth (explicit — never `*`). */
+  TRUSTED_ORIGINS?: string;
 };
 
 const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/openai';
@@ -70,6 +78,10 @@ function forbiddenKeys(raw: unknown): string[] {
 export interface ApiDeps {
   vision?: VisionProvider;
   caps?: MemoryCaps;
+  /** Anonymous-device auth. When absent, auth routes 404 and caps fall back to IP. */
+  auth?: TallyAuth;
+  /** Explicit web origins for cookie CORS (mirrors BETTER_AUTH trustedOrigins). */
+  authOrigins?: string[];
 }
 
 export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiDeps = {}) {
@@ -77,6 +89,13 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
   const caps = deps.caps ?? new MemoryCaps();
 
   app.get('/health', (c) => c.json({ status: 'ok' }));
+
+  if (deps.auth) {
+    if (deps.authOrigins && deps.authOrigins.length > 0) {
+      app.use('/api/auth/*', cors({ origin: deps.authOrigins, credentials: true }));
+    }
+    app.all('/api/auth/*', (c) => deps.auth!.handler(c.req.raw));
+  }
 
   app.post('/prices/report', async (c) => {
     const raw: unknown = await c.req.json().catch(() => undefined);
@@ -153,7 +172,15 @@ export function createApp(store: PriceStore = new MemoryPriceStore(), deps: ApiD
 
     const ip = c.req.header('cf-connecting-ip') ?? 'anon';
     const day = new Date().toISOString().slice(0, 10);
-    if (!caps.take(`${ip}:${day}`)) {
+    // Per-device caps when the device holds an anonymous session, else
+    // per-IP fallback. The device id is a random auth id — it never
+    // appears in the shared price tables.
+    let capsKey = `ip:${ip}:${day}`;
+    if (deps.auth) {
+      const session = await deps.auth.api.getSession({ headers: c.req.raw.headers }).catch(() => null);
+      if (session) capsKey = `device:${session.user.id}:${day}`;
+    }
+    if (!caps.take(capsKey)) {
       return c.json({ message: 'Daily tag-read limit reached' }, 429);
     }
 
@@ -244,12 +271,32 @@ export type AppType = typeof app;
 const appCache = new Map<string, typeof app>();
 
 function appFor(env: Bindings): typeof app {
-  const key = env.DATABASE_URL ?? 'memory';
+  const key = `${env.DATABASE_URL ?? 'memory'}|${env.BETTER_AUTH_SECRET ? 'auth' : 'noauth'}`;
   const cached = appCache.get(key);
   if (cached) return cached;
-  const built = env.DATABASE_URL
-    ? createApp(new DrizzlePriceStore(openDb(env.DATABASE_URL)))
-    : app;
+  let built: typeof app;
+  if (env.DATABASE_URL) {
+    const db = openDb(env.DATABASE_URL);
+    const store = new DrizzlePriceStore(db);
+    if (env.BETTER_AUTH_SECRET) {
+      const origins = (env.TRUSTED_ORIGINS ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      built = createApp(store, {
+        auth: createAuth(db, {
+          secret: env.BETTER_AUTH_SECRET,
+          ...(env.BETTER_AUTH_URL ? { baseURL: env.BETTER_AUTH_URL } : {}),
+          ...(origins.length > 0 ? { trustedOrigins: origins } : {}),
+        }),
+        ...(origins.length > 0 ? { authOrigins: origins } : {}),
+      });
+    } else {
+      built = createApp(store);
+    }
+  } else {
+    built = app;
+  }
   appCache.set(key, built);
   return built;
 }

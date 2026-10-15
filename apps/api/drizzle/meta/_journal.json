@@ -15,6 +15,13 @@
       "when": 1792069877968,
       "tag": "0001_current-prices-unique",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792070328362,
+      "tag": "0002_auth",
+      "breakpoints": true
     }
   ]
 }
