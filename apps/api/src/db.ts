@@ -1,7 +1,8 @@
 import { neon } from '@neondatabase/serverless';
 import { and, desc, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { priceObservations, products, stores } from './schema.js';
+import { resolvePrice } from '@tally/shared';
+import { currentPrices, priceObservations, products, stores } from './schema.js';
 import type { PriceStore, StoredObservation } from './store.js';
 
 export type NeonDb = ReturnType<typeof drizzle>;
@@ -60,7 +61,34 @@ export class DrizzlePriceStore implements PriceStore {
       });
     const row = rows[0];
     if (!row) throw new Error('price observation insert returned no rows');
-    return toStored(row);
+    const stored = toStored(row);
+    // Keep the derived current price fresh on every write: the winner over
+    // all observations (shared ranking — lower sources never win) is the
+    // row the catalog seed and fast reads consume.
+    const winner = resolvePrice(await this.list(record.storeId, record.barcode));
+    if (winner) {
+      await this.db
+        .insert(currentPrices)
+        .values({
+          storeId: record.storeId,
+          barcode: record.barcode,
+          priceMinor: winner.priceMinor,
+          source: winner.source,
+          observedAt: new Date(winner.observedAt),
+          confidence: winner.confidence,
+        })
+        .onConflictDoUpdate({
+          target: [currentPrices.storeId, currentPrices.barcode],
+          set: {
+            priceMinor: winner.priceMinor,
+            source: winner.source,
+            observedAt: new Date(winner.observedAt),
+            confidence: winner.confidence,
+            updatedAt: new Date(),
+          },
+        });
+    }
+    return stored;
   }
 
   async list(storeId: string, barcode: string): Promise<StoredObservation[]> {

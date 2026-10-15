@@ -9,6 +9,7 @@ import {
   real,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -96,7 +97,7 @@ export const currentPrices = pgTable(
       .default(sql`now()`),
   },
   (t) => [
-    index('current_prices_store_barcode_idx').on(t.storeId, t.barcode),
+    uniqueIndex('current_prices_store_barcode_idx').on(t.storeId, t.barcode),
   ],
 );
 
