@@ -16,6 +16,7 @@
 - V1 step 12: durable tag caps — `Caps` seam (memory for tests, `DrizzleCaps` upsert in Neon in prod); stale days swept on take; live-Neon tests prove limit, key isolation, sweep. 26 api tests with env, `tsc` clean
 - V1 step 13: auth cleanup cron — `cleanupExpiredAuth` sweeps expired sessions/verifications + orphaned anonymous users; `scheduled` handler + daily `[triggers]` cron in wrangler.toml (dry-run validates, fires after deploy). 27 api tests with env, `tsc` clean
 - V1 step 14: photo cache — `PhotoCache` seam (memory/Drizzle over `ai_results` hash index, photos never stored); identical bytes replay without model call or budget; barcode-late replays store on arrival; `ai_results` audit rows now written. Tests caught a per-request-cache bug pre-commit. 32 api tests with env, `tsc` clean
+- V1 step 15: verification sweep — secret scan clean, no stubs/TODOs in prod paths, full gates green (22 shared / 36 web / 32 api with live Neon, zero leftover rows), PWA + landing + worker dry-run builds pass; web auth client sends credentials for cross-origin cookies
 - Pi config: `AGENTS.md` context, `.pi/settings.json`, `.pi/prompts/` (12 commands), `.pi/mcp.json` (neon/context7/exa)
 - Skills: 25/25 `agent-skills` + hono, workers-best-practices, wrangler, web-perf, vercel-react-best-practices, vercel-composition-patterns, web-design-guidelines, frontend-ui-engineering, supabase-postgres-best-practices, impeccable (34 total)
 - Review agents: `.pi/agents/` ×4 (inherit project context)
